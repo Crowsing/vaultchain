@@ -1,19 +1,181 @@
-"""Build docs/errors-reference.md from exception classes in vaultchain.shared.errors.
+"""Build docs/errors-reference.md from `DomainError` subclasses.
 
-Phase 1 brief phase1-shared-006 finalizes this. Stub follows the same shape as
-generate_openapi.py — exits 0 in both modes until the source classes exist.
+Walks every `vaultchain.*` submodule, finds concrete `DomainError` subclasses
+(skipping the abstract base and any subclass with an empty `code`), then
+emits one H2 section per code with HTTP status, Meaning, When emitted,
+Suggested user action, and Related details fields.
+
+Idempotent: running twice produces no diff. CI's stage 8 ("OpenAPI/errors-reference
+drift") runs `--check` and fails if the rendered output diverges from the
+file committed at `docs/errors-reference.md`.
+
+Usage:
+    python scripts/generate_errors_reference.py            # write/overwrite
+    python scripts/generate_errors_reference.py --check    # exit 1 on drift
 """
+
 from __future__ import annotations
 
 import argparse
+import importlib
+import inspect
+import pkgutil
+import re
 import sys
+from http import HTTPStatus
+from pathlib import Path
+from typing import Iterable
+
+import vaultchain
+from vaultchain.shared.domain.errors import DomainError
+
+OUTPUT_PATH = Path("docs/errors-reference.md")
+
+_DETAIL_LINE_RE = re.compile(r"^\s*\*\s+`([^`]+)`\s*[—:-]\s*(.+)$")
+
+
+def _walk_subclasses(root: type[DomainError]) -> Iterable[type[DomainError]]:
+    """Yield every subclass of `root` (transitively), deduped."""
+    seen: set[type[DomainError]] = set()
+    pending: list[type[DomainError]] = list(root.__subclasses__())
+    while pending:
+        cls = pending.pop()
+        if cls in seen:
+            continue
+        seen.add(cls)
+        pending.extend(cls.__subclasses__())
+        yield cls
+
+
+def _import_all_submodules(pkg: object) -> None:
+    """Import every submodule of `pkg` so subclasses register themselves."""
+    pkg_path = pkg.__path__  # type: ignore[attr-defined]
+    pkg_name = pkg.__name__  # type: ignore[attr-defined]
+    for _finder, name, _is_pkg in pkgutil.walk_packages(pkg_path, prefix=f"{pkg_name}."):
+        try:
+            importlib.import_module(name)
+        except Exception:
+            # A submodule failing to import is the submodule's own problem;
+            # don't let one broken file kill the whole catalog.
+            continue
+
+
+def _parse_docstring(cls: type[DomainError]) -> tuple[str, str, str, list[tuple[str, str]]]:
+    """Pull (meaning, when_emitted, suggested_action, related_details) from cls.__doc__.
+
+    Convention:
+
+        \"\"\"<first line: Meaning>
+
+        When emitted: <one-line description>
+        Suggested action: <one-line description>
+        Related details:
+          * `field` — short note
+          * `another` — short note
+        \"\"\"
+
+    Missing sections fall back to sensible defaults.
+    """
+    raw = inspect.getdoc(cls) or ""
+    meaning = raw.splitlines()[0].strip() if raw else ""
+    suggested = "n/a"
+    when_emitted = "Per subclass-specific raise sites; see source."
+    related: list[tuple[str, str]] = []
+
+    in_details = False
+    for line in raw.splitlines()[1:]:
+        stripped = line.strip()
+        lower = stripped.lower()
+        if lower.startswith("when emitted:"):
+            value = stripped.split(":", 1)[1].strip()
+            if value:
+                when_emitted = value
+            in_details = False
+        elif lower.startswith("suggested action:"):
+            value = stripped.split(":", 1)[1].strip()
+            if value:
+                suggested = value
+            in_details = False
+        elif lower.startswith("related details"):
+            in_details = True
+        elif in_details:
+            m = _DETAIL_LINE_RE.match(line)
+            if m:
+                related.append((m.group(1), m.group(2).strip()))
+    return meaning, when_emitted, suggested, related
+
+
+def _format_section(cls: type[DomainError]) -> str:
+    meaning, when_emitted, suggested, related = _parse_docstring(cls)
+    try:
+        status = HTTPStatus(cls.status_code)
+        status_text = f"{status.value} {status.phrase}"
+    except ValueError:
+        status_text = str(cls.status_code)
+
+    lines: list[str] = [
+        f"## `{cls.code}`",
+        "",
+        f"- **HTTP status:** {status_text}",
+        f"- **Meaning:** {meaning or 'See source.'}",
+        f"- **When emitted:** {when_emitted}",
+        f"- **Suggested user action:** {suggested}",
+    ]
+    if related:
+        lines.append("- **Related details fields:**")
+        for name, note in related:
+            lines.append(f"  - `{name}` — {note}")
+    else:
+        lines.append("- **Related details fields:** _(none documented)_")
+    lines.append("")
+    return "\n".join(lines)
+
+
+def render() -> str:
+    _import_all_submodules(vaultchain)
+    subclasses = sorted(
+        (cls for cls in _walk_subclasses(DomainError) if cls.code),
+        key=lambda c: c.code,
+    )
+    body: list[str] = [
+        "# VaultChain — Errors Reference",
+        "",
+        "> Auto-generated by `scripts/generate_errors_reference.py`. Do not hand-edit.",
+        "> Add a new section by introducing a `DomainError` subclass with a docstring.",
+        "",
+    ]
+    if not subclasses:
+        body.append("_No concrete `DomainError` subclasses are registered yet._")
+        body.append("")
+    else:
+        body.extend(_format_section(cls) for cls in subclasses)
+    return "\n".join(body).rstrip() + "\n"
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--check", action="store_true")
-    parser.parse_args()
-    print("Errors reference skipped (no exception classes yet — phase1-shared-006 wires this).")
+    args = parser.parse_args()
+
+    rendered = render()
+    repo_root = Path(__file__).resolve().parents[1]
+    target = repo_root / OUTPUT_PATH
+
+    if args.check:
+        existing = target.read_text(encoding="utf-8") if target.exists() else ""
+        if existing != rendered:
+            print(
+                f"errors-reference drift: {target} is out of sync; rerun "
+                "`python scripts/generate_errors_reference.py`.",
+                file=sys.stderr,
+            )
+            return 1
+        print("errors-reference: up to date.")
+        return 0
+
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(rendered, encoding="utf-8")
+    print(f"errors-reference written to {target}.")
     return 0
 
 
