@@ -10,7 +10,7 @@ estimated_hours: 4
 id: phase1-admin-001
 phase: 1
 sdd_mode: lightweight
-state: review
+state: merged
 title: Admin SPA bootstrap (separate Vite app)
 touches_adrs: []
 ---
