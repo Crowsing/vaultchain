@@ -35,3 +35,15 @@ def test_app_factory_idempotent() -> None:
     assert a is not b
     assert isinstance(a, FastAPI)
     assert isinstance(b, FastAPI)
+
+
+def test_openapi_declares_idempotency_key_parameter() -> None:
+    """phase1-shared-006: a reusable `IdempotencyKey` parameter component is registered."""
+    app = create_app()
+    schema = app.openapi()
+    params = schema.get("components", {}).get("parameters", {})
+    assert "IdempotencyKey" in params
+    idem = params["IdempotencyKey"]
+    assert idem["name"] == "Idempotency-Key"
+    assert idem["in"] == "header"
+    assert idem["schema"]["maxLength"] == 200

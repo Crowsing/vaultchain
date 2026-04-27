@@ -101,7 +101,12 @@ markers = [
   "live: tests against real external services (manual only)",
   "property: hypothesis property tests",
 ]
-filterwarnings = ["error"]
+filterwarnings = [
+  "error",
+  # testcontainers emits a DeprecationWarning at import time about its own
+  # `@wait_container_is_ready` decorator; nothing we can fix here.
+  "ignore:.*wait_container_is_ready decorator is deprecated.*:DeprecationWarning",
+]
 addopts = "-ra --strict-markers --strict-config"
 
 # ----------------------- Coverage -----------------------

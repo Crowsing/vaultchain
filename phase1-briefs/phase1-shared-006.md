@@ -1,5 +1,5 @@
 ---
-ac_count: 1
+ac_count: 8
 blocks:
 - phase1-identity-005
 complexity: M
@@ -10,7 +10,7 @@ estimated_hours: 4
 id: phase1-shared-006
 phase: 1
 sdd_mode: strict
-state: ready
+state: in_progress
 title: Idempotency middleware (Redis-backed dual-layer)
 touches_adrs: []
 ---
