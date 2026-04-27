@@ -25,6 +25,7 @@ class Settings(BaseSettings):
     # ------------- core / phase 1 -------------
     environment: str = Field(default="dev", description="dev | test | staging | production")
     secret_key: SecretStr = Field(..., min_length=32)
+    master_key_path: str | None = None
     database_url: str = Field(..., description="postgresql+asyncpg URL")
     redis_url: str = Field(..., description="redis:// or rediss:// URL")
     sentry_dsn_backend: str | None = None
