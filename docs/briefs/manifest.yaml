@@ -4,7 +4,8 @@ counts:
   total: 67
   by_state:
     merged: 1
-    ready: 66
+    ready: 65
+    review: 1
   by_phase:
     1: 18
     2: 17
@@ -228,14 +229,14 @@ briefs:
   title: Error envelope mapper + DomainError → HTTP exception_handler
   complexity: S
   sdd_mode: strict
-  state: ready
+  state: review
   depends_on: []
   blocks:
   - phase1-identity-005
   - phase1-admin-002
   - phase1-shared-006
   touches_adrs: []
-  ac_count: 1
+  ac_count: 8
   estimated_hours: 4
   path: phase1-briefs/phase1-shared-005.md
 - id: phase1-shared-006

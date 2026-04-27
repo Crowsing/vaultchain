@@ -3,6 +3,11 @@
 Phase 1 briefs (shared-002+) wire concrete routers, middleware, dependency
 overrides, and lifespan handlers. For bootstrap this exposes only /healthz
 so deploy + CI can validate the app boots.
+
+`phase1-shared-005` adds the canonical error envelope: a request-id
+middleware that stamps every request, plus exception handlers that translate
+`DomainError` subclasses, FastAPI's `RequestValidationError`, and any
+unhandled `Exception` into the `{error: {...}}` shape.
 """
 
 from __future__ import annotations
@@ -14,6 +19,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from vaultchain.config import get_settings
+from vaultchain.shared.delivery import RequestIdMiddleware, register_error_handlers
 
 
 @asynccontextmanager
@@ -30,6 +36,10 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
         debug=(settings.environment == "dev"),
     )
+    # Register middlewares from outermost to innermost. CORS is outermost so
+    # it can decorate every response (including errors). RequestIdMiddleware
+    # sits inside CORS so the id is bound for the duration of the actual
+    # handler execution and any handler-emitted errors.
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origins,
@@ -37,6 +47,9 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+    app.add_middleware(RequestIdMiddleware)
+
+    register_error_handlers(app)
 
     @app.get("/healthz")
     async def healthz() -> dict[str, str]:
