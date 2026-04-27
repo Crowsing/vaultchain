@@ -82,7 +82,7 @@ briefs:
 - id: phase1-deploy-001
   phase: 1
   context: deploy
-  title: Deploy backend Fly.io + frontends Cloudflare Pages
+  title: Deploy backend + frontends to single Hetzner VM via docker-compose-prod
   complexity: M
   sdd_mode: lightweight
   state: ready
