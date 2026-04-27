@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+.python-version.local
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.hypothesis/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+*.egg-info/
+
+# Node
+node_modules/
+dist/
+.turbo/
+.parcel-cache/
+*.tsbuildinfo
+
+# Editors
+.idea/
+.vscode/
+.DS_Store
+*.swp
+*~
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# Build artifacts
+backend/dist/
+backend/build/
+web/dist/
+apps/admin/dist/
+
+# Local state
+.claude/state/
+.claude/cache/
+
+# Docker volumes
+.docker-data/
