@@ -1,0 +1,9 @@
+@import "../../tokens.css";
+@import "tailwindcss";
+
+@theme {
+  /* Bridge tokens.css custom properties into Tailwind's design system. */
+  /* Phase 1 frontend briefs expand this with full token mapping. */
+}
+
+html { color-scheme: light dark; }

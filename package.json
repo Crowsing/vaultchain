@@ -1,0 +1,21 @@
+{
+  "name": "vaultchain-monorepo",
+  "private": true,
+  "version": "0.1.0",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.11.0",
+    "pnpm": ">=9"
+  },
+  "scripts": {
+    "lint": "pnpm -r run lint",
+    "typecheck": "pnpm -r run typecheck",
+    "test": "pnpm -r run test",
+    "build": "pnpm -r run build",
+    "format": "prettier --write \"**/*.{ts,tsx,json,md,yaml,yml}\""
+  },
+  "devDependencies": {
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.3"
+  }
+}
