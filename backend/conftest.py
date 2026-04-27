@@ -3,6 +3,7 @@
 Registers hypothesis profiles per spec §7.2. Active profile selected via
 HYPOTHESIS_PROFILE env var (default 'dev').
 """
+
 from __future__ import annotations
 
 import os

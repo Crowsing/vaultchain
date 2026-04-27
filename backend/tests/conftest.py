@@ -3,6 +3,7 @@
 Provides session-scoped stubs for tests that don't need real services.
 Phase 1+ briefs replace these with real testcontainers-driven fixtures.
 """
+
 from __future__ import annotations
 
 import os

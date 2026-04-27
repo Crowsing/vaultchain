@@ -4,6 +4,7 @@ Phase 1 briefs (specifically phase1-shared-003) populate target_metadata.
 For now this is a no-op runner that lets `alembic upgrade head` succeed
 on an empty migration set.
 """
+
 from __future__ import annotations
 
 import asyncio

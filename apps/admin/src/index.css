@@ -6,4 +6,6 @@
   /* Phase 1 frontend briefs expand this with full token mapping. */
 }
 
-html { color-scheme: light dark; }
+html {
+  color-scheme: light dark;
+}

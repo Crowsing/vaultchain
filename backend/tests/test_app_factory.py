@@ -6,9 +6,9 @@ For bootstrap we only require:
 - /healthz returns 200 with JSON {"status": "ok"}
 - App reads config from env (no hard-coded secrets in factory)
 """
+
 from __future__ import annotations
 
-import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
