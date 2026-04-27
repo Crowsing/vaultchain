@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(git *)",
+      "Bash(gh *)",
+      "Bash(poetry *)",
+      "Bash(pnpm *)",
+      "Bash(make *)",
+      "Bash(python scripts/*)",
+      "Bash(pre-commit *)",
+      "Bash(docker compose *)",
+      "Bash(pytest *)",
+      "Bash(ruff *)",
+      "Bash(mypy *)",
+      "Bash(lint-imports)",
+      "Bash(alembic *)"
+    ],
+    "deny": [
+      "Bash(rm -rf *)",
+      "Bash(git push --force *)",
+      "Bash(git push --force-with-lease *)",
+      "Bash(git reset --hard *)",
+      "Bash(git commit --no-verify *)",
+      "Bash(git rebase -i *)",
+      "Bash(pip install *)",
+      "Write(.env*)",
+      "Write(**/secrets/**)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [],
+    "PostToolUse": []
+  }
+}
