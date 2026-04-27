@@ -1,0 +1,12 @@
+{
+  "name": "@vaultchain/design-tokens",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Shared design tokens (colors, typography, motion) consumed by web and admin SPAs.",
+  "files": [
+    "tokens.css"
+  ],
+  "exports": {
+    "./tokens.css": "./tokens.css"
+  }
+}

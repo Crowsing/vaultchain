@@ -2,3 +2,4 @@ packages:
   - "web"
   - "apps/admin"
   - "shared-types"
+  - "packages/*"
