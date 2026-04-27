@@ -1,0 +1,52 @@
+name: Manifest on Merge
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: write
+
+jobs:
+  update-state:
+    if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'feature/')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install pyyaml python-frontmatter
+      - name: Extract brief id
+        id: extract
+        run: |
+          BRANCH="${{ github.event.pull_request.head.ref }}"
+          BRIEF_ID="${BRANCH#feature/}"
+          echo "brief_id=$BRIEF_ID" >> "$GITHUB_OUTPUT"
+          PHASE=$(echo "$BRIEF_ID" | cut -c1-6)
+          echo "phase=$PHASE" >> "$GITHUB_OUTPUT"
+      - name: Mark merged + regen manifest
+        run: |
+          python scripts/transition_brief_state.py "${{ steps.extract.outputs.brief_id }}" merged
+          python scripts/gen_manifest.py
+      - name: Append progress log
+        run: |
+          PHASE_NUM=${{ steps.extract.outputs.phase }}
+          PHASE_NUM=${PHASE_NUM#phase}
+          mkdir -p docs/progress
+          LOG="docs/progress/phase${PHASE_NUM}-log.md"
+          touch "$LOG"
+          ENTRY="$(date -u +%Y-%m-%dT%H:%M:%SZ) | merged | ${{ steps.extract.outputs.brief_id }} | PR #${{ github.event.pull_request.number }}"
+          echo "$ENTRY" >> "$LOG"
+      - name: Commit + push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add ${{ steps.extract.outputs.phase }}-briefs/${{ steps.extract.outputs.brief_id }}.md \
+                  docs/briefs/manifest.yaml docs/briefs/dependency-graph.mmd \
+                  docs/progress/
+          git commit -m "chore: mark ${{ steps.extract.outputs.brief_id }} merged [skip ci]" || echo "nothing to commit"
+          git push origin main

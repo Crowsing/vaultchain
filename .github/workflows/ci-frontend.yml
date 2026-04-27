@@ -1,0 +1,49 @@
+name: CI Frontend
+
+on:
+  pull_request:
+    paths:
+      - "web/**"
+      - "apps/admin/**"
+      - "shared-types/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "tokens.css"
+      - ".github/workflows/ci-frontend.yml"
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-frontend-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 9 }
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @vaultchain/web run lint
+      - run: pnpm --filter @vaultchain/admin run lint
+      - run: pnpm --filter @vaultchain/web run typecheck
+      - run: pnpm --filter @vaultchain/admin run typecheck
+      - run: pnpm --filter @vaultchain/web run test
+      - run: pnpm --filter @vaultchain/admin run test
+      - run: pnpm --filter @vaultchain/web run build
+      - run: pnpm --filter @vaultchain/admin run build
+      - name: Bundle size warning
+        run: |
+          WEB_SIZE=$(du -sb web/dist | cut -f1)
+          MAX=524288  # 512 KiB
+          echo "web bundle size (raw): $WEB_SIZE bytes (max raw: 1MB; gzipped target: 500KB)"
+          if [ "$WEB_SIZE" -gt 4194304 ]; then
+            echo "::warning::web bundle exceeds 4MB raw"
+          fi

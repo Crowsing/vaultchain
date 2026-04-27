@@ -1,0 +1,51 @@
+name: Notify Phase Complete
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/briefs/phase_pointer.yaml"
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 2 }
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install pyyaml
+      - name: Detect awaiting state
+        id: detect
+        run: |
+          BEFORE=$(git show HEAD~1:docs/briefs/phase_pointer.yaml 2>/dev/null || echo "")
+          AFTER=$(cat docs/briefs/phase_pointer.yaml)
+          STATE_BEFORE=$(echo "$BEFORE" | python -c "import sys,yaml; d=yaml.safe_load(sys.stdin) or {}; print(d.get('phase_state',''))")
+          STATE_AFTER=$(echo "$AFTER" | python -c "import sys,yaml; d=yaml.safe_load(sys.stdin) or {}; print(d.get('phase_state',''))")
+          PHASE_AFTER=$(echo "$AFTER" | python -c "import sys,yaml; d=yaml.safe_load(sys.stdin) or {}; print(d.get('current_phase',''))")
+          if [ "$STATE_BEFORE" != "$STATE_AFTER" ] && echo "$STATE_AFTER" | grep -qE '^awaiting_[0-9]_approval$|^complete$'; then
+            echo "fire=yes" >> "$GITHUB_OUTPUT"
+            echo "current_phase=$PHASE_AFTER" >> "$GITHUB_OUTPUT"
+            echo "new_state=$STATE_AFTER" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Telegram notify
+        if: steps.detect.outputs.fire == 'yes'
+        run: |
+          PHASE=${{ steps.detect.outputs.current_phase }}
+          STATE=${{ steps.detect.outputs.new_state }}
+          if [ "$STATE" = "complete" ]; then
+            MSG="🎉 V1 complete — all 4 phases merged on main."
+          else
+            NEXT=$(echo "$STATE" | grep -oE '[0-9]')
+            MSG=$(cat <<EOF
+          🎯 Phase $PHASE complete
+          Summary: ${{ github.server_url }}/${{ github.repository }}/blob/main/docs/progress/phase${PHASE}-summary.md
+          Next: run \`/approve-phase $NEXT\` in your claude session
+          EOF
+          )
+          fi
+          curl -fsS -X POST "https://api.telegram.org/bot${{ secrets.TG_BOT_TOKEN }}/sendMessage" \
+               -d chat_id="${{ secrets.TG_CHAT_ID }}" \
+               -d parse_mode=Markdown \
+               -d text="$MSG"

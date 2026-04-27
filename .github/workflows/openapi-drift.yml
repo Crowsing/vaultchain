@@ -1,0 +1,20 @@
+name: OpenAPI Drift
+
+on:
+  pull_request:
+    paths:
+      - "backend/src/vaultchain/**/delivery/**"
+      - "docs/api-contract.yaml"
+
+jobs:
+  drift-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pipx install "poetry==1.8.4"
+      - working-directory: backend
+        run: poetry install --with dev
+      - run: cd backend && poetry run python ../scripts/generate_openapi.py --check

@@ -1,0 +1,258 @@
+name: CI Backend
+
+on:
+  pull_request:
+    paths:
+      - "backend/**"
+      - "scripts/**"
+      - "tests/**"
+      - "phase[1-4]-briefs/**"
+      - "docs/briefs/**"
+      - "docs/api-contract.yaml"
+      - ".github/workflows/ci-backend.yml"
+  push:
+    branches: [main]
+
+env:
+  PYTHON_VERSION: "3.12"
+  POETRY_VERSION: "1.8.4"
+  HYPOTHESIS_PROFILE: ci
+
+concurrency:
+  group: ci-backend-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  stage1-lint:
+    name: "Stage 1 — lint + frontmatter + manifest"
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "${{ env.PYTHON_VERSION }}" }
+      - name: Install Poetry
+        run: pipx install "poetry==${{ env.POETRY_VERSION }}"
+      - name: Cache poetry venv
+        uses: actions/cache@v4
+        with:
+          path: backend/.venv
+          key: poetry-${{ runner.os }}-${{ hashFiles('backend/poetry.lock') }}
+      - name: Install backend deps
+        working-directory: backend
+        run: poetry install --with dev
+      - name: ruff check
+        working-directory: backend
+        run: poetry run ruff check .
+      - name: ruff format check
+        working-directory: backend
+        run: poetry run ruff format --check .
+      - name: mypy --strict
+        working-directory: backend
+        run: poetry run mypy src/vaultchain
+      - name: import-linter
+        working-directory: backend
+        run: poetry run lint-imports
+      - name: validate frontmatter
+        run: cd backend && poetry run python ../scripts/validate_frontmatter.py
+      - name: gen_manifest --check
+        run: cd backend && poetry run python ../scripts/gen_manifest.py --check
+
+  stage2-domain:
+    name: "Stage 2 — domain tests"
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: [stage1-lint]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "${{ env.PYTHON_VERSION }}" }
+      - run: pipx install "poetry==${{ env.POETRY_VERSION }}"
+      - name: Cache poetry venv
+        uses: actions/cache@v4
+        with:
+          path: backend/.venv
+          key: poetry-${{ runner.os }}-${{ hashFiles('backend/poetry.lock') }}
+      - working-directory: backend
+        run: poetry install --with dev
+      - working-directory: backend
+        run: poetry run pytest tests -k "domain" -m "not slow and not live" --cov=src/vaultchain --cov-report=xml
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage-domain
+          path: backend/coverage.xml
+
+  stage3-application:
+    name: "Stage 3 — application tests"
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    needs: [stage1-lint]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "${{ env.PYTHON_VERSION }}" }
+      - run: pipx install "poetry==${{ env.POETRY_VERSION }}"
+      - name: Cache poetry venv
+        uses: actions/cache@v4
+        with:
+          path: backend/.venv
+          key: poetry-${{ runner.os }}-${{ hashFiles('backend/poetry.lock') }}
+      - working-directory: backend
+        run: poetry install --with dev
+      - working-directory: backend
+        run: poetry run pytest tests -k "application" -m "not slow and not live" --cov=src/vaultchain --cov-report=xml
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage-application
+          path: backend/coverage.xml
+
+  stage4-adapters:
+    name: "Stage 4 — adapter tests (testcontainers + anvil)"
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    needs: [stage1-lint]
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: vaultchain
+          POSTGRES_PASSWORD: dev
+          POSTGRES_DB: vaultchain_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "${{ env.PYTHON_VERSION }}" }
+      - run: pipx install "poetry==${{ env.POETRY_VERSION }}"
+      - name: Install foundry (for anvil)
+        uses: foundry-rs/foundry-toolchain@v1
+      - name: Cache poetry venv
+        uses: actions/cache@v4
+        with:
+          path: backend/.venv
+          key: poetry-${{ runner.os }}-${{ hashFiles('backend/poetry.lock') }}
+      - working-directory: backend
+        run: poetry install --with dev
+      - working-directory: backend
+        env:
+          DATABASE_URL: postgresql+asyncpg://vaultchain:dev@localhost:5432/vaultchain_test
+          REDIS_URL: redis://localhost:6379/0
+        run: poetry run pytest tests -k "infra or adapter" -m "not slow and not live" --cov=src/vaultchain --cov-report=xml
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage-adapters
+          path: backend/coverage.xml
+
+  stage5-contract:
+    name: "Stage 5 — contract tests (FastAPI TestClient)"
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    needs: [stage2-domain, stage3-application, stage4-adapters]
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: vaultchain
+          POSTGRES_PASSWORD: dev
+          POSTGRES_DB: vaultchain_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready --health-interval 5s --health-timeout 3s --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "${{ env.PYTHON_VERSION }}" }
+      - run: pipx install "poetry==${{ env.POETRY_VERSION }}"
+      - name: Cache poetry venv
+        uses: actions/cache@v4
+        with:
+          path: backend/.venv
+          key: poetry-${{ runner.os }}-${{ hashFiles('backend/poetry.lock') }}
+      - working-directory: backend
+        run: poetry install --with dev
+      - working-directory: backend
+        env:
+          DATABASE_URL: postgresql+asyncpg://vaultchain:dev@localhost:5432/vaultchain_test
+          REDIS_URL: redis://localhost:6379/0
+        run: poetry run pytest tests -k "contract or api" -m "not slow and not live" --cov=src/vaultchain --cov-report=xml
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage-contract
+          path: backend/coverage.xml
+
+  stage6-e2e:
+    name: "Stage 6 — E2E (Playwright, 10–15 critical journeys)"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [stage5-contract]
+    if: github.event.pull_request.draft == false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "${{ env.PYTHON_VERSION }}" }
+      - uses: pnpm/action-setup@v4
+        with: { version: 9 }
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pipx install "poetry==${{ env.POETRY_VERSION }}"
+      - run: pnpm install --frozen-lockfile
+      - working-directory: backend
+        run: poetry install --with dev
+      - name: Run e2e tests (placeholder — phase 1 brief installs Playwright)
+        run: echo "e2e placeholder; phase1-shared-007 wires Playwright"
+
+  stage7-coverage:
+    name: "Stage 7 — coverage gate"
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    needs: [stage2-domain, stage3-application, stage4-adapters, stage5-contract]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "${{ env.PYTHON_VERSION }}" }
+      - run: pipx install "poetry==${{ env.POETRY_VERSION }}"
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: coverage-*
+          path: coverage-artifacts
+          merge-multiple: false
+      - working-directory: backend
+        run: poetry install --with dev
+      - working-directory: backend
+        run: |
+          poetry run coverage combine ../coverage-artifacts/*/coverage.xml || true
+          poetry run python ../scripts/check_coverage.py
+
+  stage8-openapi-drift:
+    name: "Stage 8 — OpenAPI/errors-reference drift"
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    needs: [stage5-contract]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "${{ env.PYTHON_VERSION }}" }
+      - run: pipx install "poetry==${{ env.POETRY_VERSION }}"
+      - working-directory: backend
+        run: poetry install --with dev
+      - name: OpenAPI drift
+        run: |
+          cd backend
+          poetry run python ../scripts/generate_openapi.py --check
+      - name: Errors reference drift
+        run: |
+          cd backend
+          poetry run python ../scripts/generate_errors_reference.py --check
