@@ -13,7 +13,7 @@ estimated_hours: 4
 id: phase1-shared-003
 phase: 1
 sdd_mode: strict
-state: in_progress
+state: merged
 title: Concrete UnitOfWork + DomainEvent outbox table
 touches_adrs: []
 ---
