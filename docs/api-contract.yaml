@@ -1,0 +1,13 @@
+openapi: "3.1.0"
+info:
+  title: VaultChain API
+  version: 0.1.0
+  description: |
+    Auto-generated from FastAPI by `scripts/generate_openapi.py`.
+    Phase 1 brief phase1-shared-005 wires the generation pipeline.
+servers:
+  - url: https://api.example.com
+    description: placeholder until phase1-deploy-001 fills <USER_DOMAIN>
+paths: {}
+components:
+  schemas: {}
