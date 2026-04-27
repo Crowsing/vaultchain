@@ -3,8 +3,7 @@ phase_state: in_progress
 counts:
   total: 67
   by_state:
-    in_progress: 1
-    merged: 2
+    merged: 3
     ready: 64
   by_phase:
     1: 18
@@ -245,7 +244,7 @@ briefs:
   title: Idempotency middleware (Redis-backed dual-layer)
   complexity: M
   sdd_mode: strict
-  state: in_progress
+  state: merged
   depends_on:
   - phase1-shared-005
   blocks:
