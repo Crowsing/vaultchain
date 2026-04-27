@@ -6,13 +6,13 @@ title: Admin SPA bootstrap (separate Vite app)
 complexity: S
 sdd_mode: lightweight
 estimated_hours: 4
-state: ready
+state: in_progress
 depends_on: []
 blocks:
 - phase1-admin-002
 - phase1-admin-003
 touches_adrs: []
-ac_count: 1
+ac_count: 8
 ---
 
 # Brief: phase1-admin-001 — Admin SPA bootstrap

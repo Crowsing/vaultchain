@@ -3,7 +3,8 @@ phase_state: in_progress
 counts:
   total: 67
   by_state:
-    ready: 67
+    in_progress: 1
+    ready: 66
   by_phase:
     1: 18
     2: 17
@@ -35,13 +36,13 @@ briefs:
   title: Admin SPA bootstrap (separate Vite app)
   complexity: S
   sdd_mode: lightweight
-  state: ready
+  state: in_progress
   depends_on: []
   blocks:
   - phase1-admin-002
   - phase1-admin-003
   touches_adrs: []
-  ac_count: 1
+  ac_count: 8
   estimated_hours: 4
   path: phase1-briefs/phase1-admin-001.md
 - id: phase1-admin-002
