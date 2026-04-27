@@ -1,4 +1,4 @@
-@import "../../../tokens.css";
+@import "@vaultchain/design-tokens/tokens.css";
 @import "tailwindcss";
 
 @theme {

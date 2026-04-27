@@ -1,9 +1,15 @@
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+
+import LoginRoute from "@/routes/login";
+import NotFoundRoute from "@/routes/not-found";
+
 export default function App() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-zinc-950">
-      <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
-        VaultChain Admin
-      </h1>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<LoginRoute />} />
+        <Route path="*" element={<NotFoundRoute />} />
+      </Routes>
+    </BrowserRouter>
   );
 }

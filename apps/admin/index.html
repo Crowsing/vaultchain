@@ -1,10 +1,20 @@
 <!doctype html>
-<html lang="en" class="">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" type="image/svg+xml" href="/admin-favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>VaultChain</title>
+    <meta name="robots" content="noindex,nofollow" />
+    <title>VaultChain Admin</title>
+    <script>
+      // Theme bootstrap — runs before React hydrates to avoid FOUC.
+      // Single signal in V1: prefers-color-scheme. No per-app toggle.
+      document.documentElement.dataset.theme = matchMedia(
+        "(prefers-color-scheme: dark)",
+      ).matches
+        ? "dark"
+        : "light";
+    </script>
   </head>
   <body>
     <div id="root"></div>

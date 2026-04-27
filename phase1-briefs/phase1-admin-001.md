@@ -1,18 +1,18 @@
 ---
-id: phase1-admin-001
-phase: 1
-context: admin
-title: Admin SPA bootstrap (separate Vite app)
-complexity: S
-sdd_mode: lightweight
-estimated_hours: 4
-state: ready
-depends_on: []
+ac_count: 8
 blocks:
 - phase1-admin-002
 - phase1-admin-003
+complexity: S
+context: admin
+depends_on: []
+estimated_hours: 4
+id: phase1-admin-001
+phase: 1
+sdd_mode: lightweight
+state: review
+title: Admin SPA bootstrap (separate Vite app)
 touches_adrs: []
-ac_count: 1
 ---
 
 # Brief: phase1-admin-001 — Admin SPA bootstrap
