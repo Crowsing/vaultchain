@@ -1,0 +1,182 @@
+[tool.poetry]
+name = "vaultchain"
+version = "0.1.0"
+description = "Custodial multi-chain wallet with Sumsub KYC + Claude AI"
+authors = ["VaultChain contributors"]
+license = "MIT"
+readme = "../README.md"
+packages = [{include = "vaultchain", from = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = "^0.115.0"
+uvicorn = {extras = ["standard"], version = "^0.32.0"}
+pydantic = "^2.9.0"
+pydantic-settings = "^2.6.0"
+sqlalchemy = {extras = ["asyncio"], version = "^2.0.36"}
+asyncpg = "^0.30.0"
+alembic = "^1.14.0"
+redis = "^5.2.0"
+arq = "^0.26.0"
+httpx = "^0.27.0"
+structlog = "^24.4.0"
+sentry-sdk = {extras = ["fastapi"], version = "^2.18.0"}
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.0"
+pytest-asyncio = "^0.24.0"
+pytest-cov = "^6.0.0"
+hypothesis = "^6.118.0"
+testcontainers = {extras = ["postgres", "redis"], version = "^4.8.0"}
+ruff = "^0.7.0"
+mypy = "^1.13.0"
+import-linter = "^2.1"
+factory-boy = "^3.3.0"
+freezegun = "^1.5.0"
+respx = "^0.21.0"
+vcrpy = "^6.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+# ----------------------- Ruff -----------------------
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+  "E", "F", "W",       # pyflakes/pycodestyle
+  "I",                  # isort
+  "B",                  # bugbear
+  "UP",                 # pyupgrade
+  "RUF",                # ruff-specific
+  "ASYNC",              # async checks
+  "S",                  # bandit security
+  "C4",                 # comprehensions
+  "PT",                 # pytest style
+  "SIM",                # simplify
+  "TID",                # tidy imports
+  "PL",                 # pylint subset
+]
+ignore = [
+  "S101",   # asserts allowed in tests
+  "PLR0913", # many args ok in factories
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["S105", "S106", "PLR2004"]
+"alembic/**/*.py" = ["E501"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+# ----------------------- MyPy strict -----------------------
+[tool.mypy]
+strict = true
+python_version = "3.12"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+no_implicit_optional = true
+plugins = ["pydantic.mypy"]
+files = ["src/vaultchain"]
+exclude = ["tests/", "alembic/"]
+
+[[tool.mypy.overrides]]
+module = ["testcontainers.*", "vcr.*", "factory.*"]
+ignore_missing_imports = true
+
+# ----------------------- Pytest + Hypothesis -----------------------
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+markers = [
+  "slow: tests that take >1s",
+  "live: tests against real external services (manual only)",
+  "property: hypothesis property tests",
+]
+filterwarnings = ["error"]
+addopts = "-ra --strict-markers --strict-config"
+
+# ----------------------- Coverage -----------------------
+[tool.coverage.run]
+source = ["src/vaultchain"]
+branch = false
+omit = ["*/tests/*", "*/alembic/*"]
+
+[tool.coverage.report]
+fail_under = 85
+show_missing = true
+skip_covered = false
+exclude_lines = [
+  "pragma: no cover",
+  "raise NotImplementedError",
+  "if TYPE_CHECKING:",
+  "@abstractmethod",
+]
+
+# ----------------------- Import-Linter -----------------------
+[tool.importlinter]
+root_package = "vaultchain"
+
+[[tool.importlinter.contracts]]
+name = "AI never imports Custody"
+type = "forbidden"
+source_modules = ["vaultchain.ai"]
+forbidden_modules = ["vaultchain.custody"]
+
+[[tool.importlinter.contracts]]
+name = "Domain never imports infra"
+type = "forbidden"
+source_modules = [
+  "vaultchain.identity.domain",
+  "vaultchain.kyc.domain",
+  "vaultchain.wallet.domain",
+  "vaultchain.custody.domain",
+  "vaultchain.chains.domain",
+  "vaultchain.ledger.domain",
+  "vaultchain.balances.domain",
+  "vaultchain.transactions.domain",
+  "vaultchain.contacts.domain",
+  "vaultchain.notifications.domain",
+  "vaultchain.pricing.domain",
+  "vaultchain.ai.domain",
+]
+forbidden_modules = [
+  "vaultchain.identity.infra",
+  "vaultchain.kyc.infra",
+  "vaultchain.wallet.infra",
+  "vaultchain.custody.infra",
+  "vaultchain.chains.infra",
+  "vaultchain.ledger.infra",
+  "vaultchain.balances.infra",
+  "vaultchain.transactions.infra",
+  "vaultchain.contacts.infra",
+  "vaultchain.notifications.infra",
+  "vaultchain.pricing.infra",
+  "vaultchain.ai.infra",
+]
+
+[[tool.importlinter.contracts]]
+name = "Custody only sees ApprovedTx, not Transaction"
+type = "forbidden"
+source_modules = [
+  "vaultchain.custody.application",
+  "vaultchain.custody.domain",
+]
+forbidden_modules = ["vaultchain.transactions.domain"]
+
+[[tool.importlinter.contracts]]
+name = "Cross-context write goes through gateways"
+type = "forbidden"
+source_modules = ["vaultchain.transactions.application"]
+forbidden_modules = [
+  "vaultchain.custody.infra",
+  "vaultchain.chains.infra",
+  "vaultchain.ledger.infra",
+  "vaultchain.kyc.infra",
+]
