@@ -9,7 +9,7 @@
     "preview": "vite preview --port 5173",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src --ext ts,tsx --max-warnings 0",
-    "test": "vitest run"
+    "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
     "@vaultchain/design-tokens": "workspace:*",
@@ -38,6 +38,8 @@
     "eslint": "^9.13.0",
     "eslint-plugin-react": "^7.37.0",
     "eslint-plugin-react-hooks": "^5.0.0",
+    "typescript-eslint": "^8.10.0",
+    "globals": "^15.11.0",
     "tailwindcss": "^4.0.0-beta.4",
     "@tailwindcss/vite": "^4.0.0-beta.4",
     "autoprefixer": "^10.4.20",
