@@ -1,5 +1,5 @@
 ---
-ac_count: 1
+ac_count: 8
 blocks: []
 complexity: M
 context: shared
@@ -9,7 +9,7 @@ estimated_hours: 4
 id: phase1-shared-004
 phase: 1
 sdd_mode: strict
-state: ready
+state: in_progress
 title: Outbox publisher worker + EventBus implementation
 touches_adrs: []
 ---

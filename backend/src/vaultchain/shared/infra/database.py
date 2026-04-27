@@ -10,7 +10,7 @@ from __future__ import annotations
 from datetime import datetime
 from uuid import UUID
 
-from sqlalchemy import Integer, MetaData, Text, func
+from sqlalchemy import ForeignKey, Integer, MetaData, Text, UniqueConstraint, func
 from sqlalchemy.dialects.postgresql import JSONB, TIMESTAMP
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
@@ -54,4 +54,28 @@ class DomainEventRow(Base):
     last_error: Mapped[str | None] = mapped_column(Text, nullable=True)
 
 
-__all__ = ["Base", "DomainEventRow"]
+class EventHandlerLogRow(Base):
+    """`shared.event_handler_log` — idempotency ledger for outbox dispatch."""
+
+    __tablename__ = "event_handler_log"
+    __table_args__ = (
+        UniqueConstraint("event_id", "handler_name", name="uq_event_handler_log_event_handler"),
+        {"schema": "shared"},
+    )
+
+    id: Mapped[UUID] = mapped_column(
+        PG_UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid()
+    )
+    event_id: Mapped[UUID] = mapped_column(
+        PG_UUID(as_uuid=True),
+        ForeignKey("shared.domain_events.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    handler_name: Mapped[str] = mapped_column(Text, nullable=False)
+    processed_at: Mapped[datetime] = mapped_column(
+        TIMESTAMP(timezone=True), nullable=False, server_default=func.now()
+    )
+    status: Mapped[str] = mapped_column(Text, nullable=False)
+
+
+__all__ = ["Base", "DomainEventRow", "EventHandlerLogRow"]
