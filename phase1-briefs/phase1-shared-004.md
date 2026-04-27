@@ -9,7 +9,7 @@ estimated_hours: 4
 id: phase1-shared-004
 phase: 1
 sdd_mode: strict
-state: in_progress
+state: merged
 title: Outbox publisher worker + EventBus implementation
 touches_adrs: []
 ---
