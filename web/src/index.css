@@ -1,11 +1,69 @@
+/* VaultChain web — global stylesheet.
+ *
+ * Order: design tokens (CSS custom properties) → fontsource → tailwind →
+ * @theme bridge so Tailwind utilities resolve to our token values.
+ */
+
 @import "@vaultchain/design-tokens/tokens.css";
+@import "@fontsource-variable/inter";
+@import "@fontsource/jetbrains-mono";
 @import "tailwindcss";
 
-@theme {
-  /* Bridge tokens.css custom properties into Tailwind's design system. */
-  /* Phase 1 frontend briefs expand this with full token mapping. */
+@theme inline {
+  /* Surfaces / page */
+  --color-bg-page: var(--bg-page);
+  --color-bg-surface: var(--bg-surface);
+  --color-bg-surface-raised: var(--bg-surface-raised);
+  --color-bg-surface-sunken: var(--bg-surface-sunken);
+  /* Borders */
+  --color-border-default: var(--border-default);
+  --color-border-strong: var(--border-strong);
+  /* Text */
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-text-brand: var(--text-brand);
+  --color-text-on-brand: var(--text-on-brand);
+  /* Brand + states */
+  --color-brand: var(--brand-solid);
+  --color-brand-hover: var(--brand-solid-hover);
+  --color-brand-subtle: var(--brand-subtle);
+  --color-success: var(--success-solid);
+  --color-success-subtle: var(--success-subtle);
+  --color-danger: var(--danger-solid);
+  --color-danger-subtle: var(--danger-subtle);
+  --color-ai: var(--ai-solid);
+  --color-ai-subtle: var(--ai-subtle);
+  /* Radius */
+  --radius-xs: var(--radius-xs);
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+  /* Fonts */
+  --font-sans:
+    "Inter Variable", "Inter", system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, sans-serif;
+  --font-mono:
+    "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
 html {
   color-scheme: light dark;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background-color: var(--bg-page);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code,
+pre,
+kbd,
+samp {
+  font-family: var(--font-mono);
 }

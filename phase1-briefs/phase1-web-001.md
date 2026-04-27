@@ -1,5 +1,5 @@
 ---
-ac_count: 2
+ac_count: 7
 blocks:
 - phase1-web-002
 - phase1-web-005
@@ -10,7 +10,7 @@ estimated_hours: 4
 id: phase1-web-001
 phase: 1
 sdd_mode: lightweight
-state: ready
+state: in_progress
 title: Web SPA bootstrap (Vite, Tailwind, design tokens, shadcn)
 touches_adrs: []
 ---

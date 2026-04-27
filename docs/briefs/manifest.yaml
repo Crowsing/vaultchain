@@ -3,8 +3,9 @@ phase_state: in_progress
 counts:
   total: 67
   by_state:
+    in_progress: 1
     merged: 3
-    ready: 64
+    ready: 63
   by_phase:
     1: 18
     2: 17
@@ -259,13 +260,13 @@ briefs:
   title: Web SPA bootstrap (Vite, Tailwind, design tokens, shadcn)
   complexity: M
   sdd_mode: lightweight
-  state: ready
+  state: in_progress
   depends_on: []
   blocks:
   - phase1-web-002
   - phase1-web-005
   touches_adrs: []
-  ac_count: 2
+  ac_count: 7
   estimated_hours: 4
   path: phase1-briefs/phase1-web-001.md
 - id: phase1-web-002
