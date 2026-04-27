@@ -1,0 +1,1289 @@
+current_phase: 1
+phase_state: in_progress
+counts:
+  total: 67
+  by_state:
+    ready: 67
+  by_phase:
+    1: 18
+    2: 17
+    3: 19
+    4: 13
+  by_context:
+    admin: 7
+    ai: 10
+    audit: 1
+    balances: 1
+    chains: 9
+    custody: 4
+    demo: 1
+    deploy: 1
+    faucet: 1
+    identity: 5
+    kyc: 3
+    ledger: 3
+    notifications: 1
+    pricing: 1
+    shared: 4
+    transactions: 4
+    wallet: 2
+    web: 9
+briefs:
+- id: phase1-admin-001
+  phase: 1
+  context: admin
+  title: Admin SPA bootstrap (separate Vite app)
+  complexity: S
+  sdd_mode: lightweight
+  state: ready
+  depends_on: []
+  blocks:
+  - phase1-admin-002
+  - phase1-admin-003
+  touches_adrs: []
+  ac_count: 1
+  estimated_hours: 4
+  path: phase1-briefs/phase1-admin-001.md
+- id: phase1-admin-002
+  phase: 1
+  context: admin
+  title: Admin auth (password + TOTP) + session
+  complexity: M
+  sdd_mode: strict
+  state: ready
+  depends_on:
+  - phase1-identity-001
+  - phase1-identity-003
+  - phase1-identity-004
+  - phase1-shared-005
+  - phase1-admin-001
+  blocks:
+  - phase1-admin-003
+  touches_adrs: []
+  ac_count: 4
+  estimated_hours: 4
+  path: phase1-briefs/phase1-admin-002.md
+- id: phase1-admin-003
+  phase: 1
+  context: admin
+  title: Admin dashboard skeleton (empty queues)
+  complexity: S
+  sdd_mode: lightweight
+  state: ready
+  depends_on:
+  - phase1-admin-001
+  - phase1-admin-002
+  blocks:
+  - phase1-deploy-001
+  touches_adrs: []
+  ac_count: 3
+  estimated_hours: 4
+  path: phase1-briefs/phase1-admin-003.md
+- id: phase1-deploy-001
+  phase: 1
+  context: deploy
+  title: Deploy backend Fly.io + frontends Cloudflare Pages
+  complexity: M
+  sdd_mode: lightweight
+  state: ready
+  depends_on:
+  - phase1-identity-005
+  - phase1-web-003
+  - phase1-web-004
+  - phase1-web-005
+  - phase1-admin-003
+  blocks: []
+  touches_adrs: []
+  ac_count: 1
+  estimated_hours: 4
+  path: phase1-briefs/phase1-deploy-001.md
+- id: phase1-identity-001
+  phase: 1
+  context: identity
+  title: Identity domain (User, Session, MagicLink, TotpSecret)
+  complexity: M
+  sdd_mode: strict
+  state: ready
+  depends_on:
+  - phase1-shared-003
+  blocks:
+  - phase1-identity-002
+  - phase1-identity-003
+  - phase1-identity-004
+  - phase1-admin-002
+  touches_adrs: []
+  ac_count: 1
+  estimated_hours: 4
+  path: phase1-briefs/phase1-identity-001.md
+- id: phase1-identity-002
+  phase: 1
+  context: identity
+  title: Magic-link signup/login flow + email port + console adapter
+  complexity: L
+  sdd_mode: strict
+  state: ready
+  depends_on:
+  - phase1-identity-001
+  - phase1-shared-003
+  blocks:
+  - phase1-identity-005
+  touches_adrs: []
+  ac_count: 3
+  estimated_hours: 4
+  path: phase1-briefs/phase1-identity-002.md
+- id: phase1-identity-003
+  phase: 1
+  context: identity
+  title: TOTP enrollment + verification use cases
+  complexity: M
+  sdd_mode: strict
+  state: ready
+  depends_on:
+  - phase1-identity-001
+  - phase1-shared-003
+  blocks:
+  - phase1-identity-005
+  - phase1-admin-002
+  touches_adrs: []
+  ac_count: 4
+  estimated_hours: 4
+  path: phase1-briefs/phase1-identity-003.md
+- id: phase1-identity-004
+  phase: 1
+  context: identity
+  title: Session management — cookies, CSRF, refresh-token rotation
+  complexity: M
+  sdd_mode: strict
+  state: ready
+  depends_on:
+  - phase1-identity-001
+  - phase1-shared-003
+  blocks:
+  - phase1-identity-005
+  - phase1-admin-002
+  touches_adrs:
+  - ADR-002
+  ac_count: 2
+  estimated_hours: 4
+  path: phase1-briefs/phase1-identity-004.md
+- id: phase1-identity-005
+  phase: 1
+  context: identity
+  title: Auth API endpoints + OpenAPI
+  complexity: M
+  sdd_mode: strict
+  state: ready
+  depends_on:
+  - phase1-identity-002
+  - phase1-identity-003
+  - phase1-identity-004
+  - phase1-shared-005
+  - phase1-shared-006
+  blocks:
+  - phase1-web-002
+  - phase1-web-003
+  - phase1-web-005
+  - phase1-deploy-001
+  touches_adrs:
+  - ADR-002
+  ac_count: 1
+  estimated_hours: 4
+  path: phase1-briefs/phase1-identity-005.md
+- id: phase1-shared-003
+  phase: 1
+  context: shared
+  title: Concrete UnitOfWork + DomainEvent outbox table
+  complexity: L
+  sdd_mode: strict
+  state: ready
+  depends_on: []
+  blocks:
+  - phase1-shared-004
+  - phase1-identity-001
+  - phase1-identity-002
+  - phase1-identity-003
+  - phase1-identity-004
+  touches_adrs: []
+  ac_count: 1
+  estimated_hours: 4
+  path: phase1-briefs/phase1-shared-003.md
+- id: phase1-shared-004
+  phase: 1
+  context: shared
+  title: Outbox publisher worker + EventBus implementation
+  complexity: M
+  sdd_mode: strict
+  state: ready
+  depends_on:
+  - phase1-shared-003
+  blocks: []
+  touches_adrs: []
+  ac_count: 1
+  estimated_hours: 4
+  path: phase1-briefs/phase1-shared-004.md
+- id: phase1-shared-005
+  phase: 1
+  context: shared
+  title: Error envelope mapper + DomainError → HTTP exception_handler
+  complexity: S
+  sdd_mode: strict
+  state: ready
+  depends_on: []
+  blocks:
+  - phase1-identity-005
+  - phase1-admin-002
+  - phase1-shared-006
+  touches_adrs: []
+  ac_count: 1
+  estimated_hours: 4
+  path: phase1-briefs/phase1-shared-005.md
+- id: phase1-shared-006
+  phase: 1
+  context: shared
+  title: Idempotency middleware (Redis-backed dual-layer)
+  complexity: M
+  sdd_mode: strict
+  state: ready
+  depends_on:
+  - phase1-shared-005
+  blocks:
+  - phase1-identity-005
+  touches_adrs: []
+  ac_count: 1
+  estimated_hours: 4
+  path: phase1-briefs/phase1-shared-006.md
+- id: phase1-web-001
+  phase: 1
+  context: web
+  title: Web SPA bootstrap (Vite, Tailwind, design tokens, shadcn)
+  complexity: M
+  sdd_mode: lightweight
+  state: ready
+  depends_on: []
+  blocks:
+  - phase1-web-002
+  - phase1-web-005
+  touches_adrs: []
+  ac_count: 2
+  estimated_hours: 4
+  path: phase1-briefs/phase1-web-001.md
+- id: phase1-web-002
+  phase: 1
+  context: web
+  title: API client, TanStack Query setup, error boundary
+  complexity: S
+  sdd_mode: lightweight
+  state: ready
+  depends_on:
+  - phase1-web-001
+  - phase1-identity-005
+  blocks:
+  - phase1-web-003
+  - phase1-web-004
+  - phase1-web-005
+  touches_adrs: []
+  ac_count: 1
+  estimated_hours: 4
+  path: phase1-briefs/phase1-web-002.md
+- id: phase1-web-003
+  phase: 1
+  context: web
+  title: Auth screens (signup, magic-link sent, login, TOTP enrollment)
+  complexity: L
+  sdd_mode: lightweight
+  state: ready
+  depends_on:
+  - phase1-web-002
+  - phase1-identity-005
+  blocks:
+  - phase1-deploy-001
+  touches_adrs: []
+  ac_count: 1
+  estimated_hours: 4
+  path: phase1-briefs/phase1-web-003.md
+- id: phase1-web-004
+  phase: 1
+  context: web
+  title: Dashboard skeleton, Tier 0 banner, empty states
+  complexity: M
+  sdd_mode: lightweight
+  state: ready
+  depends_on:
+  - phase1-web-005
+  - phase1-web-002
+  blocks:
+  - phase1-deploy-001
+  touches_adrs: []
+  ac_count: 7
+  estimated_hours: 4
+  path: phase1-briefs/phase1-web-004.md
+- id: phase1-web-005
+  phase: 1
+  context: web
+  title: App shell, routing, session bootstrap
+  complexity: M
+  sdd_mode: lightweight
+  state: ready
+  depends_on:
+  - phase1-web-001
+  - phase1-web-002
+  - phase1-identity-005
+  blocks:
+  - phase1-web-004
+  - phase1-deploy-001
+  touches_adrs: []
+  ac_count: 6
+  estimated_hours: 4
+  path: phase1-briefs/phase1-web-005.md
+- id: phase2-audit-001
+  phase: 2
+  context: audit
+  title: Audit context (log table, subscribers, /admin/audit endpoint)
+  complexity: M
+  sdd_mode: strict
+  state: ready
+  depends_on:
+  - phase2-custody-002
+  - phase1-admin-002
+  - phase1-shared-003
+  blocks: []
+  touches_adrs: []
+  ac_count: 10
+  estimated_hours: 4
+  path: phase2-briefs/phase2-audit-001.md
+- id: phase2-balances-001
+  phase: 2
+  context: balances
+  title: Balances read-projection + GET /portfolio with USD aggregation
+  complexity: M
+  sdd_mode: strict
+  state: ready
+  depends_on:
+  - phase2-ledger-001
+  - phase2-ledger-002
+  - phase2-pricing-001
+  - phase2-wallet-001
+  - phase2-chains-001
+  blocks:
+  - phase2-web-006
+  touches_adrs: []
+  ac_count: 8
+  estimated_hours: 4
+  path: phase2-briefs/phase2-balances-001.md
+- id: phase2-chains-001
+  phase: 2
+  context: chains
+  title: Chains context + Ethereum read adapter
+  complexity: M
+  sdd_mode: strict
+  state: ready
+  depends_on:
+  - phase1-shared-003
+  - phase1-shared-005
+  blocks:
+  - phase2-chains-002
+  - phase2-wallet-001
+  - phase2-balances-001
+  - phase2-deposit-watcher-001
+  touches_adrs:
+  - ADR-005
+  ac_count: 5
+  estimated_hours: 4
+  path: phase2-briefs/phase2-chains-001.md
+- id: phase2-chains-002
+  phase: 2
+  context: chains
+  title: Ethereum write path (build, fee, broadcast, receipt monitor)
+  complexity: L
+  sdd_mode: strict
+  state: ready
+  depends_on:
+  - phase2-chains-001
+  - phase2-custody-002
+  blocks:
+  - phase2-transactions-002
+  - phase2-faucet-001
+  touches_adrs: []
+  ac_count: 8
+  estimated_hours: 4
+  path: phase2-briefs/phase2-chains-002.md
+- id: phase2-custody-001
+  phase: 2
+  context: custody
+  title: Custody domain, KMS port, envelope encryption pattern
+  complexity: L
+  sdd_mode: strict
+  state: ready
+  depends_on:
+  - phase1-shared-003
+  - phase1-shared-005
+  blocks:
+  - phase2-custody-002
+  touches_adrs:
+  - ADR-004
+  ac_count: 7
+  estimated_hours: 4
+  path: phase2-briefs/phase2-custody-001.md
+- id: phase2-custody-002
+  phase: 2
+  context: custody
+  title: KMS adapter (LocalStack/AWS) + signing service
+  complexity: M
+  sdd_mode: strict
+  state: ready
+  depends_on:
+  - phase2-custody-001
+  - phase1-shared-003
+  blocks:
+  - phase2-wallet-001
+  - phase2-chains-002
+  - phase2-transactions-002
+  - phase2-audit-001
+  - phase2-faucet-001
+  touches_adrs: []
+  ac_count: 8
+  estimated_hours: 4
+  path: phase2-briefs/phase2-custody-002.md
+- id: phase2-deposit-watcher-001
+  phase: 2
+  context: chains
+  title: Ethereum block scanner → DepositDetected events
+  complexity: L
+  sdd_mode: strict
+  state: ready
+  depends_on:
+  - phase2-chains-001
+  - phase2-wallet-001
+  blocks:
+  - phase2-ledger-002
+  touches_adrs: []
+  ac_count: 8
+  estimated_hours: 4
+  path: phase2-briefs/phase2-deposit-watcher-001.md
+- id: phase2-faucet-001
+  phase: 2
+  context: faucet
+  title: Sepolia faucet (own funded wallet, rate-limited, mock USDC)
+  complexity: M
+  sdd_mode: strict
+  state: ready
+  depends_on:
+  - phase2-chains-002
+  - phase2-custody-002
+  - phase2-wallet-001
+  - phase2-ledger-002
+  blocks:
+  - phase2-web-007
+  - phase2-notifications-001
+  touches_adrs: []
+  ac_count: 8
+  estimated_hours: 4
+  path: phase2-briefs/phase2-faucet-001.md
+- id: phase2-ledger-001
+  phase: 2
+  context: ledger
+  title: Ledger domain (postings, entries, accounts) + double-entry invariant
+  complexity: L
+  sdd_mode: strict
+  state: ready
+  depends_on:
+  - phase1-shared-003
+  blocks:
+  - phase2-ledger-002
+  - phase2-balances-001
+  touches_adrs:
+  - ADR-001
+  ac_count: 9
+  estimated_hours: 4
+  path: phase2-briefs/phase2-ledger-001.md
+- id: phase2-ledger-002
+  phase: 2
+  context: ledger
+  title: Ledger subscribers (deposit/withdrawal posting handlers)
+  complexity: M
+  sdd_mode: strict
+  state: ready
+  depends_on:
+  - phase2-ledger-001
+  - phase2-transactions-001
+  - phase2-transactions-002
+  - phase2-deposit-watcher-001
+  blocks:
+  - phase2-balances-001
+  - phase2-deposit-watcher-001
+  - phase2-faucet-001
+  touches_adrs: []
+  ac_count: 9
+  estimated_hours: 4
+  path: phase2-briefs/phase2-ledger-002.md
+- id: phase2-notifications-001
+  phase: 2
+  context: notifications
+  title: Notifications context + SSE channel + Resend email adapter
+  complexity: L
+  sdd_mode: strict
+  state: ready
+  depends_on:
+  - phase1-identity-002
+  - phase2-transactions-002
+  - phase2-faucet-001
+  blocks:
+  - phase2-web-006
+  - phase2-web-007
+  touches_adrs:
+  - ADR-003
+  ac_count: 8
+  estimated_hours: 4
+  path: phase2-briefs/phase2-notifications-001.md
+- id: phase2-pricing-001
+  phase: 2
+  context: pricing
+  title: Pricing context with CoinGecko adapter
+  complexity: S
+  sdd_mode: strict
+  state: ready
+  depends_on:
+  - phase1-shared-003
+  - phase1-shared-005
+  blocks:
+  - phase2-balances-001
+  - phase2-transactions-002
+  touches_adrs: []
+  ac_count: 7
+  estimated_hours: 4
+  path: phase2-briefs/phase2-pricing-001.md
+- id: phase2-transactions-001
+  phase: 2
+  context: transactions
+  title: Transactions domain (8-status state machine + Drafts)
+  complexity: L
+  sdd_mode: strict
+  state: ready
+  depends_on:
+  - phase1-shared-003
+  - phase1-shared-005
+  - phase1-shared-006
+  blocks:
+  - phase2-transactions-002
+  - phase2-ledger-002
+  touches_adrs: []
+  ac_count: 9
+  estimated_hours: 4
+  path: phase2-briefs/phase2-transactions-001.md
+- id: phase2-transactions-002
+  phase: 2
+  context: transactions
+  title: PrepareSendTransaction + ConfirmWithTotp + ExecuteTransaction + API
+  complexity: M
+  sdd_mode: strict
+  state: ready
+  depends_on:
+  - phase2-transactions-001
+  - phase2-chains-002
+  - phase2-custody-002
+  - phase2-pricing-001
+  - phase2-wallet-001
+  - phase1-identity-003
+  - phase1-shared-006
+  blocks:
+  - phase2-ledger-002
+  - phase2-notifications-001
+  - phase2-web-006
+  - phase2-web-007
+  touches_adrs: []
+  ac_count: 10
+  estimated_hours: 4
+  path: phase2-briefs/phase2-transactions-002.md
+- id: phase2-wallet-001
+  phase: 2
+  context: wallet
+  title: Wallet domain + provision-on-signup + GET /wallets
+  complexity: M
+  sdd_mode: strict
+  state: ready
+  depends_on:
+  - phase2-custody-002
+  - phase2-chains-001
+  - phase1-shared-003
+  - phase1-shared-005
+  blocks:
+  - phase2-balances-001
+  - phase2-transactions-002
+  - phase2-faucet-001
+  - phase2-web-006
+  - phase2-deposit-watcher-001
+  touches_adrs: []
+  ac_count: 6
+  estimated_hours: 4
+  path: phase2-briefs/phase2-wallet-001.md
+- id: phase2-web-006
+  phase: 2
+  context: web
+  title: Real wallet/balance/history UI + receive screen + tx detail
+  complexity: L
+  sdd_mode: lightweight
+  state: ready
+  depends_on:
+  - phase2-wallet-001
+  - phase2-balances-001
+  - phase2-transactions-002
+  - phase2-notifications-001
+  - phase1-web-005
+  blocks:
+  - phase2-web-007
+  touches_adrs: []
+  ac_count: 2
+  estimated_hours: 4
+  path: phase2-briefs/phase2-web-006.md
+- id: phase2-web-007
+  phase: 2
+  context: web
+  title: Send flow UI + funding flow UI + Playwright E2E
+  complexity: L
+  sdd_mode: lightweight
+  state: ready
+  depends_on:
+  - phase2-web-006
+  - phase2-transactions-002
+  - phase2-faucet-001
+  - phase2-notifications-001
+  blocks: []
+  touches_adrs: []
+  ac_count: 3
+  estimated_hours: 4
+  path: phase2-briefs/phase2-web-007.md
+- id: phase3-admin-004
+  phase: 3
+  context: transactions
+  title: Withdrawal approval queue endpoints + state machine progression
+  complexity: M
+  sdd_mode: strict
+  state: ready
+  depends_on:
+  - phase2-transactions-002
+  - phase3-transactions-003
+  - phase3-custody-003
+  - phase1-admin-002
+  blocks:
+  - phase3-admin-006
+  - phase3-ledger-003
+  - phase3-admin-007
+  - phase3-admin-008
+  touches_adrs: []
+  ac_count: 10
+  estimated_hours: 4
+  path: phase3-briefs/phase3-admin-004.md
+- id: phase3-admin-005
+  phase: 3
+  context: admin
+  title: Admin KYC review UI (queue + applicant detail + Sumsub iframe)
+  complexity: L
+  sdd_mode: lightweight
+  state: ready
+  depends_on:
+  - phase3-kyc-001
+  - phase3-kyc-002
+  - phase1-admin-002
+  - phase1-admin-003
+  blocks: []
+  touches_adrs: []
+  ac_count: 6
+  estimated_hours: 4
+  path: phase3-briefs/phase3-admin-005.md
+- id: phase3-admin-006
+  phase: 3
+  context: admin
+  title: Admin withdrawal approval UI + 2FA + tx detail
+  complexity: M
+  sdd_mode: lightweight
+  state: ready
+  depends_on:
+  - phase3-admin-004
+  - phase3-custody-003
+  - phase1-admin-002
+  - phase1-admin-003
+  - phase2-notifications-001
+  blocks: []
+  touches_adrs: []
+  ac_count: 8
+  estimated_hours: 4
+  path: phase3-briefs/phase3-admin-006.md
+- id: phase3-admin-007
+  phase: 3
+  context: admin
+  title: Admin user search + detail (cross-context, hot+cold visibility)
+  complexity: L
+  sdd_mode: lightweight
+  state: ready
+  depends_on:
+  - phase1-admin-002
+  - phase2-wallet-001
+  - phase3-custody-003
+  - phase3-custody-004
+  - phase3-wallet-002
+  - phase3-kyc-001
+  - phase3-ledger-003
+  - phase3-admin-004
+  blocks:
+  - phase3-admin-008
+  touches_adrs: []
+  ac_count: 4
+  estimated_hours: 4
+  path: phase3-briefs/phase3-admin-007.md
+- id: phase3-admin-008
+  phase: 3
+  context: admin
+  title: Admin transactions monitoring + audit timeline + manual rebalance trigger
+  complexity: L
+  sdd_mode: lightweight
+  state: ready
+  depends_on:
+  - phase2-audit-001
+  - phase3-custody-003
+  - phase3-custody-004
+  - phase3-admin-004
+  - phase3-admin-007
+  blocks: []
+  touches_adrs: []
+  ac_count: 7
+  estimated_hours: 4
+  path: phase3-briefs/phase3-admin-008.md
+- id: phase3-chains-003
+  phase: 3
+  context: chains
+  title: Tron read adapter + Address VO + ADR-005 update
+  complexity: L
+  sdd_mode: strict
+  state: ready
+  depends_on:
+  - phase2-chains-001
+  blocks:
+  - phase3-chains-004
+  - phase3-wallet-002
+  - phase3-deposit-watcher-002
+  touches_adrs:
+  - ADR-005
+  ac_count: 5
+  estimated_hours: 4
+  path: phase3-briefs/phase3-chains-003.md
+- id: phase3-chains-004
+  phase: 3
+  context: chains
+  title: Tron write path (tronpy signer + broadcast + receipt monitor)
+  complexity: L
+  sdd_mode: strict
+  state: ready
+  depends_on:
+  - phase3-chains-003
+  - phase2-custody-002
+  - phase2-chains-002
+  blocks:
+  - phase3-deposit-watcher-002
+  - phase3-wallet-002
+  - phase3-transactions-003
+  - phase3-custody-004
+  touches_adrs: []
+  ac_count: 9
+  estimated_hours: 4
+  path: phase3-briefs/phase3-chains-004.md
+- id: phase3-chains-005
+  phase: 3
+  context: chains
+  title: Solana read adapter + SPL token reads + ADR-005 update
+  complexity: M
+  sdd_mode: strict
+  state: ready
+  depends_on:
+  - phase2-chains-001
+  blocks:
+  - phase3-chains-006
+  - phase3-wallet-002
+  - phase3-deposit-watcher-003
+  touches_adrs:
+  - ADR-005
+  ac_count: 7
+  estimated_hours: 4
+  path: phase3-briefs/phase3-chains-005.md
+- id: phase3-chains-006
+  phase: 3
+  context: chains
+  title: Solana write path (solana-py signer + broadcast + receipt monitor)
+  complexity: L
+  sdd_mode: strict
+  state: ready
+  depends_on:
+  - phase3-chains-005
+  - phase2-custody-002
+  - phase2-chains-002
+  blocks:
+  - phase3-deposit-watcher-003
+  - phase3-wallet-002
+  - phase3-transactions-003
+  - phase3-custody-004
+  touches_adrs: []
+  ac_count: 9
+  estimated_hours: 4
+  path: phase3-briefs/phase3-chains-006.md
+- id: phase3-custody-003
+  phase: 3
+  context: custody
+  title: Cold tier (dual KMS master keys + cold signing path + backfill)
+  complexity: L
+  sdd_mode: strict
+  state: ready
+  depends_on:
+  - phase2-custody-001
+  - phase2-custody-002
+  blocks:
+  - phase3-custody-004
+  - phase3-wallet-002
+  - phase3-admin-004
+  - phase3-admin-006
+  - phase3-admin-007
+  - phase3-admin-008
+  touches_adrs:
+  - ADR-008
+  ac_count: 2
+  estimated_hours: 4
+  path: phase3-briefs/phase3-custody-003.md
+- id: phase3-custody-004
+  phase: 3
+  context: custody
+  title: Hot↔cold rebalance worker
+  complexity: M
+  sdd_mode: strict
+  state: ready
+  depends_on:
+  - phase3-custody-003
+  - phase2-chains-002
+  - phase2-ledger-001
+  - phase3-chains-004
+  - phase3-chains-006
+  blocks:
+  - phase3-ledger-003
+  - phase3-admin-007
+  - phase3-admin-008
+  touches_adrs:
+  - ADR-008
+  ac_count: 9
+  estimated_hours: 4
+  path: phase3-briefs/phase3-custody-004.md
+- id: phase3-deposit-watcher-002
+  phase: 3
+  context: chains
+  title: Tron deposit watcher (TRC-20 Transfer events + TRX balance diff)
+  complexity: M
+  sdd_mode: strict
+  state: ready
+  depends_on:
+  - phase3-chains-003
+  - phase3-chains-004
+  - phase3-wallet-002
+  - phase2-deposit-watcher-001
+  - phase2-ledger-002
+  blocks: []
+  touches_adrs: []
+  ac_count: 6
+  estimated_hours: 4
+  path: phase3-briefs/phase3-deposit-watcher-002.md
+- id: phase3-deposit-watcher-003
+  phase: 3
+  context: chains
+  title: Solana deposit watcher (logsSubscribe + SPL transfers + finalized commitment)
+  complexity: M
+  sdd_mode: strict
+  state: ready
+  depends_on:
+  - phase3-chains-005
+  - phase3-chains-006
+  - phase3-wallet-002
+  - phase2-deposit-watcher-001
+  - phase2-ledger-002
+  blocks: []
+  touches_adrs: []
+  ac_count: 7
+  estimated_hours: 4
+  path: phase3-briefs/phase3-deposit-watcher-003.md
+- id: phase3-kyc-001
+  phase: 3
+  context: kyc
+  title: KYC context + Sumsub adapter + applicant create + status query
+  complexity: L
+  sdd_mode: strict
+  state: ready
+  depends_on:
+  - phase1-identity-004
+  blocks:
+  - phase3-kyc-002
+  - phase3-kyc-003
+  - phase3-admin-005
+  - phase3-admin-007
+  touches_adrs: []
+  ac_count: 8
+  estimated_hours: 4
+  path: phase3-briefs/phase3-kyc-001.md
+- id: phase3-kyc-002
+  phase: 3
+  context: kyc
+  title: Sumsub webhook handler + tier transitions + PII redaction
+  complexity: M
+  sdd_mode: strict
+  state: ready
+  depends_on:
+  - phase3-kyc-001
+  blocks:
+  - phase3-kyc-003
+  - phase3-admin-005
+  touches_adrs: []
+  ac_count: 12
+  estimated_hours: 4
+  path: phase3-briefs/phase3-kyc-002.md
+- id: phase3-kyc-003
+  phase: 3
+  context: kyc
+  title: KYC tier enforcement port (KycTierGateway consumed by Transactions)
+  complexity: S
+  sdd_mode: strict
+  state: ready
+  depends_on:
+  - phase3-kyc-001
+  - phase3-kyc-002
+  blocks:
+  - phase3-transactions-003
+  touches_adrs:
+  - ADR-009
+  ac_count: 8
+  estimated_hours: 4
+  path: phase3-briefs/phase3-kyc-003.md
+- id: phase3-ledger-003
+  phase: 3
+  context: ledger
+  title: Withdrawal reservation flow + `internal_rebalance` posting type
+  complexity: M
+  sdd_mode: strict
+  state: ready
+  depends_on:
+  - phase2-ledger-001
+  - phase2-ledger-002
+  - phase3-transactions-003
+  - phase3-custody-004
+  - phase3-admin-004
+  blocks:
+  - phase3-admin-007
+  touches_adrs: []
+  ac_count: 7
+  estimated_hours: 4
+  path: phase3-briefs/phase3-ledger-003.md
+- id: phase3-transactions-003
+  phase: 3
+  context: transactions
+  title: ChainAwareThresholdPolicy (real threshold + KYC tier integration)
+  complexity: M
+  sdd_mode: strict
+  state: ready
+  depends_on:
+  - phase2-transactions-002
+  - phase3-kyc-003
+  - phase2-pricing-001
+  - phase3-chains-004
+  - phase3-chains-006
+  blocks:
+  - phase3-admin-004
+  - phase3-ledger-003
+  touches_adrs: []
+  ac_count: 9
+  estimated_hours: 4
+  path: phase3-briefs/phase3-transactions-003.md
+- id: phase3-wallet-002
+  phase: 3
+  context: wallet
+  title: Multi-chain provisioning (Tron+Solana+cold) + asset catalog finalization
+  complexity: M
+  sdd_mode: strict
+  state: ready
+  depends_on:
+  - phase2-wallet-001
+  - phase3-custody-003
+  - phase3-chains-003
+  - phase3-chains-004
+  - phase3-chains-005
+  - phase3-chains-006
+  blocks:
+  - phase3-deposit-watcher-002
+  - phase3-deposit-watcher-003
+  - phase3-admin-007
+  touches_adrs: []
+  ac_count: 10
+  estimated_hours: 4
+  path: phase3-briefs/phase3-wallet-002.md
+- id: phase4-ai-001
+  phase: 4
+  context: ai
+  title: AI infrastructure (Anthropic + Gemini embeddings adapters + pgvector + ai
+    schema bootstrap)
+  complexity: L
+  sdd_mode: strict
+  state: ready
+  depends_on:
+  - phase1-shared-003
+  - phase1-shared-005
+  - phase1-deploy-001
+  blocks:
+  - phase4-ai-002
+  - phase4-ai-003
+  - phase4-ai-004
+  - phase4-ai-005
+  - phase4-ai-006
+  - phase4-ai-007
+  - phase4-ai-008
+  - phase4-ai-009
+  touches_adrs:
+  - ADR-010
+  ac_count: 11
+  estimated_hours: 4
+  path: phase4-briefs/phase4-ai-001.md
+- id: phase4-ai-002
+  phase: 4
+  context: ai
+  title: Chat aggregate + `ai.conversations` / `ai.messages` persistence
+  complexity: M
+  sdd_mode: strict
+  state: ready
+  depends_on:
+  - phase1-shared-003
+  - phase1-identity-004
+  blocks:
+  - phase4-ai-004
+  - phase4-ai-005
+  - phase4-ai-006
+  - phase4-ai-007
+  - phase4-web-008
+  touches_adrs: []
+  ac_count: 12
+  estimated_hours: 4
+  path: phase4-briefs/phase4-ai-002.md
+- id: phase4-ai-003
+  phase: 4
+  context: ai
+  title: Read-only tool catalog (`get_balances`, `get_recent_transactions`, `get_kyc_status`)
+  complexity: M
+  sdd_mode: strict
+  state: ready
+  depends_on:
+  - phase2-balances-001
+  - phase2-transactions-002
+  - phase3-kyc-001
+  blocks:
+  - phase4-ai-004
+  - phase4-ai-005
+  - phase4-ai-006
+  touches_adrs: []
+  ac_count: 12
+  estimated_hours: 4
+  path: phase4-briefs/phase4-ai-003.md
+- id: phase4-ai-004
+  phase: 4
+  context: ai
+  title: Tool executor + `ai.tool_calls` audit + structured error mapping
+  complexity: M
+  sdd_mode: strict
+  state: ready
+  depends_on:
+  - phase4-ai-002
+  - phase4-ai-003
+  blocks:
+  - phase4-ai-006
+  touches_adrs: []
+  ac_count: 12
+  estimated_hours: 4
+  path: phase4-briefs/phase4-ai-004.md
+- id: phase4-ai-005
+  phase: 4
+  context: ai
+  title: '`prepare_send_transaction` tool + `PreparedAction` aggregate + ADR-011'
+  complexity: L
+  sdd_mode: strict
+  state: ready
+  depends_on:
+  - phase4-ai-001
+  - phase4-ai-002
+  - phase4-ai-003
+  - phase2-transactions-002
+  - phase3-transactions-003
+  - phase1-identity-003
+  - phase1-shared-006
+  blocks:
+  - phase4-ai-006
+  - phase4-ai-007
+  - phase4-evals-001
+  - phase4-web-008
+  touches_adrs:
+  - ADR-011
+  ac_count: 14
+  estimated_hours: 4
+  path: phase4-briefs/phase4-ai-005.md
+- id: phase4-ai-006
+  phase: 4
+  context: ai
+  title: Chat SSE endpoint + custom event protocol + ADR-012
+  complexity: L
+  sdd_mode: strict
+  state: ready
+  depends_on:
+  - phase4-ai-001
+  - phase4-ai-003
+  - phase4-ai-004
+  - phase1-identity-004
+  - phase1-shared-005
+  - phase2-notifications-001
+  blocks:
+  - phase4-ai-002
+  - phase4-ai-007
+  - phase4-evals-001
+  - phase4-web-008
+  touches_adrs:
+  - ADR-012
+  ac_count: 14
+  estimated_hours: 4
+  path: phase4-briefs/phase4-ai-006.md
+- id: phase4-ai-007
+  phase: 4
+  context: ai
+  title: Memory writer + `ai.tx_memory_embeddings` + ivfflat config + cross-user-leak
+    property
+  complexity: L
+  sdd_mode: strict
+  state: ready
+  depends_on:
+  - phase1-shared-003
+  - phase1-shared-004
+  - phase2-transactions-002
+  - phase4-ai-001
+  - phase4-ai-002
+  - phase4-ai-005
+  - phase4-ai-006
+  - phase4-ai-008
+  blocks: []
+  touches_adrs: []
+  ac_count: 11
+  estimated_hours: 4
+  path: phase4-briefs/phase4-ai-007.md
+- id: phase4-ai-008
+  phase: 4
+  context: ai
+  title: RAG over product docs (`ai.kb_embeddings` + retrieval port + ingestion CLI)
+  complexity: M
+  sdd_mode: strict
+  state: ready
+  depends_on: []
+  blocks:
+  - phase4-ai-007
+  - phase4-evals-001
+  touches_adrs: []
+  ac_count: 11
+  estimated_hours: 4
+  path: phase4-briefs/phase4-ai-008.md
+- id: phase4-ai-009
+  phase: 4
+  context: ai
+  title: Suggestions sub-domain (proactive banners on dashboard)
+  complexity: M
+  sdd_mode: strict
+  state: ready
+  depends_on:
+  - phase4-ai-001
+  - phase1-shared-003
+  - phase1-shared-004
+  - phase2-balances-001
+  - phase2-pricing-001
+  - phase3-kyc-001
+  - phase1-identity-004
+  blocks:
+  - phase4-evals-001
+  - phase4-web-008
+  touches_adrs: []
+  ac_count: 12
+  estimated_hours: 4
+  path: phase4-briefs/phase4-ai-009.md
+- id: phase4-demo-001
+  phase: 4
+  context: demo
+  title: Landing copy + demo script + screen recording outline
+  complexity: S
+  sdd_mode: lightweight
+  state: ready
+  depends_on:
+  - phase4-evals-001
+  - phase4-polish-001
+  blocks: []
+  touches_adrs: []
+  ac_count: 5
+  estimated_hours: 4
+  path: phase4-briefs/phase4-demo-001.md
+- id: phase4-evals-001
+  phase: 4
+  context: ai
+  title: Tier-3 live evals harness (manual, not CI gate)
+  complexity: S
+  sdd_mode: strict
+  state: ready
+  depends_on:
+  - phase4-ai-005
+  - phase4-ai-006
+  - phase4-ai-008
+  - phase4-ai-009
+  - phase4-web-008
+  blocks:
+  - phase4-demo-001
+  touches_adrs:
+  - ADR-006
+  ac_count: 7
+  estimated_hours: 4
+  path: phase4-briefs/phase4-evals-001.md
+- id: phase4-polish-001
+  phase: 4
+  context: web
+  title: Empty/loading/error states pass + mobile responsive QA
+  complexity: M
+  sdd_mode: lightweight
+  state: ready
+  depends_on:
+  - phase4-web-008
+  - phase1-web-003
+  - phase1-web-004
+  - phase1-web-005
+  - phase1-admin-003
+  - phase2-web-006
+  - phase2-web-007
+  - phase3-admin-004
+  - phase3-admin-005
+  - phase3-admin-006
+  - phase3-admin-007
+  - phase3-admin-008
+  blocks:
+  - phase4-demo-001
+  touches_adrs: []
+  ac_count: 8
+  estimated_hours: 4
+  path: phase4-briefs/phase4-polish-001.md
+- id: phase4-web-008
+  phase: 4
+  context: web
+  title: Chat panel UI + dashboard suggestions banner + Playwright E2E
+  complexity: L
+  sdd_mode: lightweight
+  state: ready
+  depends_on:
+  - phase4-ai-002
+  - phase4-ai-005
+  - phase4-ai-006
+  - phase4-ai-009
+  - phase2-web-007
+  - phase2-web-006
+  blocks:
+  - phase4-evals-001
+  - phase4-polish-001
+  touches_adrs: []
+  ac_count: 7
+  estimated_hours: 4
+  path: phase4-briefs/phase4-web-008.md

@@ -24,14 +24,14 @@ repos:
     hooks:
       - id: validate-frontmatter
         name: Validate brief frontmatter
-        entry: python scripts/validate_frontmatter.py
+        entry: bash -c 'poetry -C backend run python scripts/validate_frontmatter.py'
         language: system
         files: ^phase[1-4]-briefs/.*\.md$
         pass_filenames: false
 
       - id: gen-manifest
         name: Regenerate brief manifest
-        entry: python scripts/gen_manifest.py
+        entry: bash -c 'poetry -C backend run python scripts/gen_manifest.py'
         language: system
         files: ^(phase[1-4]-briefs/.*\.md|docs/briefs/phase_pointer\.yaml)$
         pass_filenames: false

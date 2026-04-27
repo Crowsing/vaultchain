@@ -17,7 +17,7 @@ required:
 properties:
   id:
     type: string
-    pattern: "^phase[1-4]-[a-z]+-[0-9]{3}$"
+    pattern: "^phase[1-4]-[a-z]+(?:-[a-z]+)*-[0-9]{3}$"
   phase:
     type: integer
     minimum: 1
@@ -40,6 +40,13 @@ properties:
       - admin
       - shared
       - deploy
+      - web
+      - audit
+      - faucet
+      - deposit-watcher
+      - polish
+      - demo
+      - evals
   title:
     type: string
     minLength: 5
@@ -60,12 +67,12 @@ properties:
     type: array
     items:
       type: string
-      pattern: "^phase[1-4]-[a-z]+-[0-9]{3}$"
+      pattern: "^phase[1-4]-[a-z]+(?:-[a-z]+)*-[0-9]{3}$"
   blocks:
     type: array
     items:
       type: string
-      pattern: "^phase[1-4]-[a-z]+-[0-9]{3}$"
+      pattern: "^phase[1-4]-[a-z]+(?:-[a-z]+)*-[0-9]{3}$"
   touches_adrs:
     type: array
     items:

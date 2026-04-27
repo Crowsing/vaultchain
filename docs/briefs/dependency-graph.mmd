@@ -1,0 +1,297 @@
+graph LR
+  classDef ready fill:#dbeafe;
+  classDef merged fill:#bbf7d0;
+  classDef in_progress fill:#fef3c7;
+  classDef blocked fill:#fecaca;
+  classDef review fill:#e9d5ff;
+  phase1_admin_001["phase1-admin-001<br/>Admin SPA bootstrap (separate Vite app)"]:::ready
+  phase1_admin_002["phase1-admin-002<br/>Admin auth (password + TOTP) + session"]:::ready
+  phase1_admin_003["phase1-admin-003<br/>Admin dashboard skeleton (empty queues)"]:::ready
+  phase1_deploy_001["phase1-deploy-001<br/>Deploy backend Fly.io + frontends Cloudf"]:::ready
+  phase1_identity_001["phase1-identity-001<br/>Identity domain (User, Session, MagicLin"]:::ready
+  phase1_identity_002["phase1-identity-002<br/>Magic-link signup/login flow + email por"]:::ready
+  phase1_identity_003["phase1-identity-003<br/>TOTP enrollment + verification use cases"]:::ready
+  phase1_identity_004["phase1-identity-004<br/>Session management — cookies, CSRF, refr"]:::ready
+  phase1_identity_005["phase1-identity-005<br/>Auth API endpoints + OpenAPI"]:::ready
+  phase1_shared_003["phase1-shared-003<br/>Concrete UnitOfWork + DomainEvent outbox"]:::ready
+  phase1_shared_004["phase1-shared-004<br/>Outbox publisher worker + EventBus imple"]:::ready
+  phase1_shared_005["phase1-shared-005<br/>Error envelope mapper + DomainError → HT"]:::ready
+  phase1_shared_006["phase1-shared-006<br/>Idempotency middleware (Redis-backed dua"]:::ready
+  phase1_web_001["phase1-web-001<br/>Web SPA bootstrap (Vite, Tailwind, desig"]:::ready
+  phase1_web_002["phase1-web-002<br/>API client, TanStack Query setup, error "]:::ready
+  phase1_web_003["phase1-web-003<br/>Auth screens (signup, magic-link sent, l"]:::ready
+  phase1_web_004["phase1-web-004<br/>Dashboard skeleton, Tier 0 banner, empty"]:::ready
+  phase1_web_005["phase1-web-005<br/>App shell, routing, session bootstrap"]:::ready
+  phase2_audit_001["phase2-audit-001<br/>Audit context (log table, subscribers, /"]:::ready
+  phase2_balances_001["phase2-balances-001<br/>Balances read-projection + GET /portfoli"]:::ready
+  phase2_chains_001["phase2-chains-001<br/>Chains context + Ethereum read adapter"]:::ready
+  phase2_chains_002["phase2-chains-002<br/>Ethereum write path (build, fee, broadca"]:::ready
+  phase2_custody_001["phase2-custody-001<br/>Custody domain, KMS port, envelope encry"]:::ready
+  phase2_custody_002["phase2-custody-002<br/>KMS adapter (LocalStack/AWS) + signing s"]:::ready
+  phase2_deposit_watcher_001["phase2-deposit-watcher-001<br/>Ethereum block scanner → DepositDetected"]:::ready
+  phase2_faucet_001["phase2-faucet-001<br/>Sepolia faucet (own funded wallet, rate-"]:::ready
+  phase2_ledger_001["phase2-ledger-001<br/>Ledger domain (postings, entries, accoun"]:::ready
+  phase2_ledger_002["phase2-ledger-002<br/>Ledger subscribers (deposit/withdrawal p"]:::ready
+  phase2_notifications_001["phase2-notifications-001<br/>Notifications context + SSE channel + Re"]:::ready
+  phase2_pricing_001["phase2-pricing-001<br/>Pricing context with CoinGecko adapter"]:::ready
+  phase2_transactions_001["phase2-transactions-001<br/>Transactions domain (8-status state mach"]:::ready
+  phase2_transactions_002["phase2-transactions-002<br/>PrepareSendTransaction + ConfirmWithTotp"]:::ready
+  phase2_wallet_001["phase2-wallet-001<br/>Wallet domain + provision-on-signup + GE"]:::ready
+  phase2_web_006["phase2-web-006<br/>Real wallet/balance/history UI + receive"]:::ready
+  phase2_web_007["phase2-web-007<br/>Send flow UI + funding flow UI + Playwri"]:::ready
+  phase3_admin_004["phase3-admin-004<br/>Withdrawal approval queue endpoints + st"]:::ready
+  phase3_admin_005["phase3-admin-005<br/>Admin KYC review UI (queue + applicant d"]:::ready
+  phase3_admin_006["phase3-admin-006<br/>Admin withdrawal approval UI + 2FA + tx "]:::ready
+  phase3_admin_007["phase3-admin-007<br/>Admin user search + detail (cross-contex"]:::ready
+  phase3_admin_008["phase3-admin-008<br/>Admin transactions monitoring + audit ti"]:::ready
+  phase3_chains_003["phase3-chains-003<br/>Tron read adapter + Address VO + ADR-005"]:::ready
+  phase3_chains_004["phase3-chains-004<br/>Tron write path (tronpy signer + broadca"]:::ready
+  phase3_chains_005["phase3-chains-005<br/>Solana read adapter + SPL token reads + "]:::ready
+  phase3_chains_006["phase3-chains-006<br/>Solana write path (solana-py signer + br"]:::ready
+  phase3_custody_003["phase3-custody-003<br/>Cold tier (dual KMS master keys + cold s"]:::ready
+  phase3_custody_004["phase3-custody-004<br/>Hot↔cold rebalance worker"]:::ready
+  phase3_deposit_watcher_002["phase3-deposit-watcher-002<br/>Tron deposit watcher (TRC-20 Transfer ev"]:::ready
+  phase3_deposit_watcher_003["phase3-deposit-watcher-003<br/>Solana deposit watcher (logsSubscribe + "]:::ready
+  phase3_kyc_001["phase3-kyc-001<br/>KYC context + Sumsub adapter + applicant"]:::ready
+  phase3_kyc_002["phase3-kyc-002<br/>Sumsub webhook handler + tier transition"]:::ready
+  phase3_kyc_003["phase3-kyc-003<br/>KYC tier enforcement port (KycTierGatewa"]:::ready
+  phase3_ledger_003["phase3-ledger-003<br/>Withdrawal reservation flow + `internal_"]:::ready
+  phase3_transactions_003["phase3-transactions-003<br/>ChainAwareThresholdPolicy (real threshol"]:::ready
+  phase3_wallet_002["phase3-wallet-002<br/>Multi-chain provisioning (Tron+Solana+co"]:::ready
+  phase4_ai_001["phase4-ai-001<br/>AI infrastructure (Anthropic + Gemini em"]:::ready
+  phase4_ai_002["phase4-ai-002<br/>Chat aggregate + `ai.conversations` / `a"]:::ready
+  phase4_ai_003["phase4-ai-003<br/>Read-only tool catalog (`get_balances`, "]:::ready
+  phase4_ai_004["phase4-ai-004<br/>Tool executor + `ai.tool_calls` audit + "]:::ready
+  phase4_ai_005["phase4-ai-005<br/>`prepare_send_transaction` tool + `Prepa"]:::ready
+  phase4_ai_006["phase4-ai-006<br/>Chat SSE endpoint + custom event protoco"]:::ready
+  phase4_ai_007["phase4-ai-007<br/>Memory writer + `ai.tx_memory_embeddings"]:::ready
+  phase4_ai_008["phase4-ai-008<br/>RAG over product docs (`ai.kb_embeddings"]:::ready
+  phase4_ai_009["phase4-ai-009<br/>Suggestions sub-domain (proactive banner"]:::ready
+  phase4_demo_001["phase4-demo-001<br/>Landing copy + demo script + screen reco"]:::ready
+  phase4_evals_001["phase4-evals-001<br/>Tier-3 live evals harness (manual, not C"]:::ready
+  phase4_polish_001["phase4-polish-001<br/>Empty/loading/error states pass + mobile"]:::ready
+  phase4_web_008["phase4-web-008<br/>Chat panel UI + dashboard suggestions ba"]:::ready
+  phase1_identity_001 --> phase1_admin_002
+  phase1_identity_003 --> phase1_admin_002
+  phase1_identity_004 --> phase1_admin_002
+  phase1_shared_005 --> phase1_admin_002
+  phase1_admin_001 --> phase1_admin_002
+  phase1_admin_001 --> phase1_admin_003
+  phase1_admin_002 --> phase1_admin_003
+  phase1_identity_005 --> phase1_deploy_001
+  phase1_web_003 --> phase1_deploy_001
+  phase1_web_004 --> phase1_deploy_001
+  phase1_web_005 --> phase1_deploy_001
+  phase1_admin_003 --> phase1_deploy_001
+  phase1_shared_003 --> phase1_identity_001
+  phase1_identity_001 --> phase1_identity_002
+  phase1_shared_003 --> phase1_identity_002
+  phase1_identity_001 --> phase1_identity_003
+  phase1_shared_003 --> phase1_identity_003
+  phase1_identity_001 --> phase1_identity_004
+  phase1_shared_003 --> phase1_identity_004
+  phase1_identity_002 --> phase1_identity_005
+  phase1_identity_003 --> phase1_identity_005
+  phase1_identity_004 --> phase1_identity_005
+  phase1_shared_005 --> phase1_identity_005
+  phase1_shared_006 --> phase1_identity_005
+  phase1_shared_003 --> phase1_shared_004
+  phase1_shared_005 --> phase1_shared_006
+  phase1_web_001 --> phase1_web_002
+  phase1_identity_005 --> phase1_web_002
+  phase1_web_002 --> phase1_web_003
+  phase1_identity_005 --> phase1_web_003
+  phase1_web_005 --> phase1_web_004
+  phase1_web_002 --> phase1_web_004
+  phase1_web_001 --> phase1_web_005
+  phase1_web_002 --> phase1_web_005
+  phase1_identity_005 --> phase1_web_005
+  phase2_custody_002 --> phase2_audit_001
+  phase1_admin_002 --> phase2_audit_001
+  phase1_shared_003 --> phase2_audit_001
+  phase2_ledger_001 --> phase2_balances_001
+  phase2_ledger_002 --> phase2_balances_001
+  phase2_pricing_001 --> phase2_balances_001
+  phase2_wallet_001 --> phase2_balances_001
+  phase2_chains_001 --> phase2_balances_001
+  phase1_shared_003 --> phase2_chains_001
+  phase1_shared_005 --> phase2_chains_001
+  phase2_chains_001 --> phase2_chains_002
+  phase2_custody_002 --> phase2_chains_002
+  phase1_shared_003 --> phase2_custody_001
+  phase1_shared_005 --> phase2_custody_001
+  phase2_custody_001 --> phase2_custody_002
+  phase1_shared_003 --> phase2_custody_002
+  phase2_chains_001 --> phase2_deposit_watcher_001
+  phase2_wallet_001 --> phase2_deposit_watcher_001
+  phase2_chains_002 --> phase2_faucet_001
+  phase2_custody_002 --> phase2_faucet_001
+  phase2_wallet_001 --> phase2_faucet_001
+  phase2_ledger_002 --> phase2_faucet_001
+  phase1_shared_003 --> phase2_ledger_001
+  phase2_ledger_001 --> phase2_ledger_002
+  phase2_transactions_001 --> phase2_ledger_002
+  phase2_transactions_002 --> phase2_ledger_002
+  phase2_deposit_watcher_001 --> phase2_ledger_002
+  phase1_identity_002 --> phase2_notifications_001
+  phase2_transactions_002 --> phase2_notifications_001
+  phase2_faucet_001 --> phase2_notifications_001
+  phase1_shared_003 --> phase2_pricing_001
+  phase1_shared_005 --> phase2_pricing_001
+  phase1_shared_003 --> phase2_transactions_001
+  phase1_shared_005 --> phase2_transactions_001
+  phase1_shared_006 --> phase2_transactions_001
+  phase2_transactions_001 --> phase2_transactions_002
+  phase2_chains_002 --> phase2_transactions_002
+  phase2_custody_002 --> phase2_transactions_002
+  phase2_pricing_001 --> phase2_transactions_002
+  phase2_wallet_001 --> phase2_transactions_002
+  phase1_identity_003 --> phase2_transactions_002
+  phase1_shared_006 --> phase2_transactions_002
+  phase2_custody_002 --> phase2_wallet_001
+  phase2_chains_001 --> phase2_wallet_001
+  phase1_shared_003 --> phase2_wallet_001
+  phase1_shared_005 --> phase2_wallet_001
+  phase2_wallet_001 --> phase2_web_006
+  phase2_balances_001 --> phase2_web_006
+  phase2_transactions_002 --> phase2_web_006
+  phase2_notifications_001 --> phase2_web_006
+  phase1_web_005 --> phase2_web_006
+  phase2_web_006 --> phase2_web_007
+  phase2_transactions_002 --> phase2_web_007
+  phase2_faucet_001 --> phase2_web_007
+  phase2_notifications_001 --> phase2_web_007
+  phase2_transactions_002 --> phase3_admin_004
+  phase3_transactions_003 --> phase3_admin_004
+  phase3_custody_003 --> phase3_admin_004
+  phase1_admin_002 --> phase3_admin_004
+  phase3_kyc_001 --> phase3_admin_005
+  phase3_kyc_002 --> phase3_admin_005
+  phase1_admin_002 --> phase3_admin_005
+  phase1_admin_003 --> phase3_admin_005
+  phase3_admin_004 --> phase3_admin_006
+  phase3_custody_003 --> phase3_admin_006
+  phase1_admin_002 --> phase3_admin_006
+  phase1_admin_003 --> phase3_admin_006
+  phase2_notifications_001 --> phase3_admin_006
+  phase1_admin_002 --> phase3_admin_007
+  phase2_wallet_001 --> phase3_admin_007
+  phase3_custody_003 --> phase3_admin_007
+  phase3_custody_004 --> phase3_admin_007
+  phase3_wallet_002 --> phase3_admin_007
+  phase3_kyc_001 --> phase3_admin_007
+  phase3_ledger_003 --> phase3_admin_007
+  phase3_admin_004 --> phase3_admin_007
+  phase2_audit_001 --> phase3_admin_008
+  phase3_custody_003 --> phase3_admin_008
+  phase3_custody_004 --> phase3_admin_008
+  phase3_admin_004 --> phase3_admin_008
+  phase3_admin_007 --> phase3_admin_008
+  phase2_chains_001 --> phase3_chains_003
+  phase3_chains_003 --> phase3_chains_004
+  phase2_custody_002 --> phase3_chains_004
+  phase2_chains_002 --> phase3_chains_004
+  phase2_chains_001 --> phase3_chains_005
+  phase3_chains_005 --> phase3_chains_006
+  phase2_custody_002 --> phase3_chains_006
+  phase2_chains_002 --> phase3_chains_006
+  phase2_custody_001 --> phase3_custody_003
+  phase2_custody_002 --> phase3_custody_003
+  phase3_custody_003 --> phase3_custody_004
+  phase2_chains_002 --> phase3_custody_004
+  phase2_ledger_001 --> phase3_custody_004
+  phase3_chains_004 --> phase3_custody_004
+  phase3_chains_006 --> phase3_custody_004
+  phase3_chains_003 --> phase3_deposit_watcher_002
+  phase3_chains_004 --> phase3_deposit_watcher_002
+  phase3_wallet_002 --> phase3_deposit_watcher_002
+  phase2_deposit_watcher_001 --> phase3_deposit_watcher_002
+  phase2_ledger_002 --> phase3_deposit_watcher_002
+  phase3_chains_005 --> phase3_deposit_watcher_003
+  phase3_chains_006 --> phase3_deposit_watcher_003
+  phase3_wallet_002 --> phase3_deposit_watcher_003
+  phase2_deposit_watcher_001 --> phase3_deposit_watcher_003
+  phase2_ledger_002 --> phase3_deposit_watcher_003
+  phase1_identity_004 --> phase3_kyc_001
+  phase3_kyc_001 --> phase3_kyc_002
+  phase3_kyc_001 --> phase3_kyc_003
+  phase3_kyc_002 --> phase3_kyc_003
+  phase2_ledger_001 --> phase3_ledger_003
+  phase2_ledger_002 --> phase3_ledger_003
+  phase3_transactions_003 --> phase3_ledger_003
+  phase3_custody_004 --> phase3_ledger_003
+  phase3_admin_004 --> phase3_ledger_003
+  phase2_transactions_002 --> phase3_transactions_003
+  phase3_kyc_003 --> phase3_transactions_003
+  phase2_pricing_001 --> phase3_transactions_003
+  phase3_chains_004 --> phase3_transactions_003
+  phase3_chains_006 --> phase3_transactions_003
+  phase2_wallet_001 --> phase3_wallet_002
+  phase3_custody_003 --> phase3_wallet_002
+  phase3_chains_003 --> phase3_wallet_002
+  phase3_chains_004 --> phase3_wallet_002
+  phase3_chains_005 --> phase3_wallet_002
+  phase3_chains_006 --> phase3_wallet_002
+  phase1_shared_003 --> phase4_ai_001
+  phase1_shared_005 --> phase4_ai_001
+  phase1_deploy_001 --> phase4_ai_001
+  phase1_shared_003 --> phase4_ai_002
+  phase1_identity_004 --> phase4_ai_002
+  phase2_balances_001 --> phase4_ai_003
+  phase2_transactions_002 --> phase4_ai_003
+  phase3_kyc_001 --> phase4_ai_003
+  phase4_ai_002 --> phase4_ai_004
+  phase4_ai_003 --> phase4_ai_004
+  phase4_ai_001 --> phase4_ai_005
+  phase4_ai_002 --> phase4_ai_005
+  phase4_ai_003 --> phase4_ai_005
+  phase2_transactions_002 --> phase4_ai_005
+  phase3_transactions_003 --> phase4_ai_005
+  phase1_identity_003 --> phase4_ai_005
+  phase1_shared_006 --> phase4_ai_005
+  phase4_ai_001 --> phase4_ai_006
+  phase4_ai_003 --> phase4_ai_006
+  phase4_ai_004 --> phase4_ai_006
+  phase1_identity_004 --> phase4_ai_006
+  phase1_shared_005 --> phase4_ai_006
+  phase2_notifications_001 --> phase4_ai_006
+  phase1_shared_003 --> phase4_ai_007
+  phase1_shared_004 --> phase4_ai_007
+  phase2_transactions_002 --> phase4_ai_007
+  phase4_ai_001 --> phase4_ai_007
+  phase4_ai_002 --> phase4_ai_007
+  phase4_ai_005 --> phase4_ai_007
+  phase4_ai_006 --> phase4_ai_007
+  phase4_ai_008 --> phase4_ai_007
+  phase4_ai_001 --> phase4_ai_009
+  phase1_shared_003 --> phase4_ai_009
+  phase1_shared_004 --> phase4_ai_009
+  phase2_balances_001 --> phase4_ai_009
+  phase2_pricing_001 --> phase4_ai_009
+  phase3_kyc_001 --> phase4_ai_009
+  phase1_identity_004 --> phase4_ai_009
+  phase4_evals_001 --> phase4_demo_001
+  phase4_polish_001 --> phase4_demo_001
+  phase4_ai_005 --> phase4_evals_001
+  phase4_ai_006 --> phase4_evals_001
+  phase4_ai_008 --> phase4_evals_001
+  phase4_ai_009 --> phase4_evals_001
+  phase4_web_008 --> phase4_evals_001
+  phase4_web_008 --> phase4_polish_001
+  phase1_web_003 --> phase4_polish_001
+  phase1_web_004 --> phase4_polish_001
+  phase1_web_005 --> phase4_polish_001
+  phase1_admin_003 --> phase4_polish_001
+  phase2_web_006 --> phase4_polish_001
+  phase2_web_007 --> phase4_polish_001
+  phase3_admin_004 --> phase4_polish_001
+  phase3_admin_005 --> phase4_polish_001
+  phase3_admin_006 --> phase4_polish_001
+  phase3_admin_007 --> phase4_polish_001
+  phase3_admin_008 --> phase4_polish_001
+  phase4_ai_002 --> phase4_web_008
+  phase4_ai_005 --> phase4_web_008
+  phase4_ai_006 --> phase4_web_008
+  phase4_ai_009 --> phase4_web_008
+  phase2_web_007 --> phase4_web_008
+  phase2_web_006 --> phase4_web_008
