@@ -11,7 +11,7 @@ estimated_hours: 4
 id: phase1-shared-005
 phase: 1
 sdd_mode: strict
-state: in_progress
+state: review
 title: Error envelope mapper + DomainError → HTTP exception_handler
 touches_adrs: []
 ---
