@@ -8,29 +8,46 @@ concurrency:
   group: deploy
   cancel-in-progress: false
 
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository_owner }}/vaultchain-api
+
 jobs:
-  deploy-backend:
+  build-image:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      packages: write
     steps:
       - uses: actions/checkout@v4
-      - uses: superfly/flyctl-actions/setup-flyctl@master
-      - run: flyctl deploy --remote-only --strategy bluegreen --app vaultchain-api
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-      - name: Healthz smoke
-        run: |
-          for i in {1..24}; do
-            if curl -fsS https://vaultchain-api.fly.dev/healthz; then exit 0; fi
-            sleep 5
-          done
-          echo "/healthz never returned 200"
-          exit 1
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/metadata-action@v5
+        id: meta
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha,format=long
+            type=ref,event=branch
+            type=raw,value=latest,enable={{is_default_branch}}
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
-  deploy-web:
+  build-frontend:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
-    needs: [deploy-backend]
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -41,28 +58,61 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @vaultchain/web build
-      - uses: cloudflare/wrangler-action@v3
+      - run: pnpm --filter @vaultchain/admin build
+      - uses: actions/upload-artifact@v4
         with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy web/dist --project-name=vaultchain-app
+          name: web-dist
+          path: web/dist/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: admin-dist
+          path: apps/admin/dist/
 
-  deploy-admin:
+  deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
-    needs: [deploy-backend]
+    timeout-minutes: 10
+    needs: [build-image, build-frontend]
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with: { version: 9 }
-      - uses: actions/setup-node@v4
+      - uses: actions/download-artifact@v4
         with:
-          node-version-file: .nvmrc
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @vaultchain/admin build
-      - uses: cloudflare/wrangler-action@v3
+          name: web-dist
+          path: web-dist
+      - uses: actions/download-artifact@v4
         with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy apps/admin/dist --project-name=vaultchain-admin
+          name: admin-dist
+          path: admin-dist
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.HETZNER_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H "${{ secrets.HETZNER_HOST }}" >> ~/.ssh/known_hosts
+      - name: Sync frontend dist/ to VM
+        run: |
+          rsync -avz --delete web-dist/ deploy@${{ secrets.HETZNER_HOST }}:/opt/vaultchain/web-dist/
+          rsync -avz --delete admin-dist/ deploy@${{ secrets.HETZNER_HOST }}:/opt/vaultchain/admin-dist/
+      - name: Sync infra files (Caddyfile + docker-compose-prod.yml)
+        run: |
+          rsync -avz Caddyfile docker-compose-prod.yml scripts/deploy-server.sh \
+                deploy@${{ secrets.HETZNER_HOST }}:/opt/vaultchain/
+      - name: Run deploy script on VM
+        run: |
+          ssh deploy@${{ secrets.HETZNER_HOST }} \
+              "VAULTCHAIN_IMAGE=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }} bash /opt/vaultchain/deploy-server.sh"
+      - name: Healthz smoke
+        run: |
+          for i in {1..24}; do
+            if curl -fsS "https://api.${{ secrets.USER_DOMAIN }}/healthz"; then exit 0; fi
+            sleep 5
+          done
+          echo "/healthz never returned 200"
+          exit 1
+      - name: Telegram notify
+        if: always()
+        run: |
+          STATUS="${{ job.status }}"
+          if [ "$STATUS" = "success" ]; then ICON="✅"; else ICON="❌"; fi
+          curl -fsS -X POST "https://api.telegram.org/bot${{ secrets.TG_BOT_TOKEN }}/sendMessage" \
+               -d chat_id="${{ secrets.TG_CHAT_ID }}" \
+               -d text="$ICON Deploy $STATUS — ${{ github.sha }}"
