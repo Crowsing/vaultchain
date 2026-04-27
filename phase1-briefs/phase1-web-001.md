@@ -10,7 +10,7 @@ estimated_hours: 4
 id: phase1-web-001
 phase: 1
 sdd_mode: lightweight
-state: in_progress
+state: merged
 title: Web SPA bootstrap (Vite, Tailwind, design tokens, shadcn)
 touches_adrs: []
 ---
