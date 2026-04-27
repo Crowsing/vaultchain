@@ -3,8 +3,9 @@ phase_state: in_progress
 counts:
   total: 67
   by_state:
+    in_progress: 1
     merged: 6
-    ready: 61
+    ready: 60
   by_phase:
     1: 18
     2: 17
@@ -104,7 +105,7 @@ briefs:
   title: Identity domain (User, Session, MagicLink, TotpSecret)
   complexity: M
   sdd_mode: strict
-  state: ready
+  state: in_progress
   depends_on:
   - phase1-shared-003
   blocks:
@@ -113,7 +114,7 @@ briefs:
   - phase1-identity-004
   - phase1-admin-002
   touches_adrs: []
-  ac_count: 1
+  ac_count: 9
   estimated_hours: 4
   path: phase1-briefs/phase1-identity-001.md
 - id: phase1-identity-002

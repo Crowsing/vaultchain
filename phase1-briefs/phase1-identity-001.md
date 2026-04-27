@@ -1,5 +1,5 @@
 ---
-ac_count: 1
+ac_count: 9
 blocks:
 - phase1-identity-002
 - phase1-identity-003
@@ -13,7 +13,7 @@ estimated_hours: 4
 id: phase1-identity-001
 phase: 1
 sdd_mode: strict
-state: ready
+state: in_progress
 title: Identity domain (User, Session, MagicLink, TotpSecret)
 touches_adrs: []
 ---
