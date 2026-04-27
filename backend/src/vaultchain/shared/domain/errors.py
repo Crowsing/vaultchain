@@ -102,10 +102,21 @@ class PermissionError(DomainError):
     default_message: ClassVar[str] = "Permission denied."
 
 
+class StaleAggregate(ConflictError):
+    """Optimistic-lock collision: aggregate version moved between read and write."""
+
+    code: ClassVar[str] = "concurrency.stale_aggregate"
+    status_code: ClassVar[int] = HTTPStatus.CONFLICT
+    default_message: ClassVar[str] = (
+        "Aggregate was modified by another writer; retry with the latest version."
+    )
+
+
 __all__ = [
     "ConflictError",
     "DomainError",
     "NotFoundError",
     "PermissionError",
+    "StaleAggregate",
     "ValidationError",
 ]
