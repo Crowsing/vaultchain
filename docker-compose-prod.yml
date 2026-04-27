@@ -1,0 +1,169 @@
+# Production stack — runs on a single Hetzner Cloud VM.
+# Boot order: postgres+redis (with healthchecks) → api → worker.
+# Caddy is a sibling service handling TLS + static SPA hosting.
+
+name: vaultchain-prod
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-vaultchain}
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+      POSTGRES_DB: ${POSTGRES_DB:-vaultchain}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    secrets:
+      - postgres_password
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-vaultchain}"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks: [vaultchain]
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes", "--save", "60", "1000"]
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks: [vaultchain]
+
+  api:
+    image: ${VAULTCHAIN_IMAGE:-ghcr.io/USER/vaultchain-api:latest}
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      ENVIRONMENT: production
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-vaultchain}@postgres:5432/${POSTGRES_DB:-vaultchain}
+      DATABASE_PASSWORD_FILE: /run/secrets/postgres_password
+      REDIS_URL: redis://redis:6379/0
+      MASTER_KEY_PATH: /run/secrets/master_key
+      SECRET_KEY_FILE: /run/secrets/secret_key
+      CORS_ORIGINS: "https://app.${USER_DOMAIN},https://admin.${USER_DOMAIN}"
+      SENTRY_DSN_BACKEND: ${SENTRY_DSN_BACKEND:-}
+      SUMSUB_APP_TOKEN_FILE: /run/secrets/sumsub_app_token
+      SUMSUB_SECRET_KEY_FILE: /run/secrets/sumsub_secret_key
+      SUMSUB_WEBHOOK_SECRET_FILE: /run/secrets/sumsub_webhook_secret
+      ANTHROPIC_API_KEY_FILE: /run/secrets/anthropic_api_key
+      GOOGLE_AI_STUDIO_API_KEY_FILE: /run/secrets/google_ai_studio_api_key
+      RESEND_API_KEY_FILE: /run/secrets/resend_api_key
+      TELEGRAM_BOT_TOKEN_FILE: /run/secrets/telegram_bot_token
+      TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID:-}
+    secrets:
+      - postgres_password
+      - master_key
+      - secret_key
+      - sumsub_app_token
+      - sumsub_secret_key
+      - sumsub_webhook_secret
+      - anthropic_api_key
+      - google_ai_studio_api_key
+      - resend_api_key
+      - telegram_bot_token
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8000/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks: [vaultchain]
+
+  worker:
+    image: ${VAULTCHAIN_IMAGE:-ghcr.io/USER/vaultchain-api:latest}
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: ["arq", "vaultchain.shared.worker.WorkerSettings"]
+    environment:
+      ENVIRONMENT: production
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-vaultchain}@postgres:5432/${POSTGRES_DB:-vaultchain}
+      DATABASE_PASSWORD_FILE: /run/secrets/postgres_password
+      REDIS_URL: redis://redis:6379/0
+      MASTER_KEY_PATH: /run/secrets/master_key
+      SECRET_KEY_FILE: /run/secrets/secret_key
+      SENTRY_DSN_BACKEND: ${SENTRY_DSN_BACKEND:-}
+      SUMSUB_APP_TOKEN_FILE: /run/secrets/sumsub_app_token
+      SUMSUB_SECRET_KEY_FILE: /run/secrets/sumsub_secret_key
+      ANTHROPIC_API_KEY_FILE: /run/secrets/anthropic_api_key
+      GOOGLE_AI_STUDIO_API_KEY_FILE: /run/secrets/google_ai_studio_api_key
+      RESEND_API_KEY_FILE: /run/secrets/resend_api_key
+      TELEGRAM_BOT_TOKEN_FILE: /run/secrets/telegram_bot_token
+    secrets:
+      - postgres_password
+      - master_key
+      - secret_key
+      - sumsub_app_token
+      - sumsub_secret_key
+      - sumsub_webhook_secret
+      - anthropic_api_key
+      - google_ai_studio_api_key
+      - resend_api_key
+      - telegram_bot_token
+    networks: [vaultchain]
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+      - /opt/vaultchain/web-dist:/srv/web:ro
+      - /opt/vaultchain/admin-dist:/srv/admin:ro
+    environment:
+      USER_DOMAIN: ${USER_DOMAIN}
+      ACME_EMAIL: ${ACME_EMAIL}
+    networks: [vaultchain]
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  postgres-data:
+  redis-data:
+  caddy-data:
+  caddy-config:
+
+networks:
+  vaultchain:
+    driver: bridge
+
+secrets:
+  postgres_password:
+    file: /etc/vaultchain/secrets/postgres_password
+  secret_key:
+    file: /etc/vaultchain/secrets/secret_key
+  master_key:
+    file: /etc/vaultchain/secrets/master_key
+  sumsub_app_token:
+    file: /etc/vaultchain/secrets/sumsub_app_token
+  sumsub_secret_key:
+    file: /etc/vaultchain/secrets/sumsub_secret_key
+  sumsub_webhook_secret:
+    file: /etc/vaultchain/secrets/sumsub_webhook_secret
+  anthropic_api_key:
+    file: /etc/vaultchain/secrets/anthropic_api_key
+  google_ai_studio_api_key:
+    file: /etc/vaultchain/secrets/google_ai_studio_api_key
+  resend_api_key:
+    file: /etc/vaultchain/secrets/resend_api_key
+  telegram_bot_token:
+    file: /etc/vaultchain/secrets/telegram_bot_token
