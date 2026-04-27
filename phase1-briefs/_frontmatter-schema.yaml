@@ -1,0 +1,76 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: VaultChain Brief Frontmatter
+type: object
+additionalProperties: false
+required:
+  - id
+  - phase
+  - context
+  - title
+  - complexity
+  - sdd_mode
+  - state
+  - depends_on
+  - blocks
+  - touches_adrs
+  - ac_count
+properties:
+  id:
+    type: string
+    pattern: "^phase[1-4]-[a-z]+-[0-9]{3}$"
+  phase:
+    type: integer
+    minimum: 1
+    maximum: 4
+  context:
+    type: string
+    enum:
+      - identity
+      - kyc
+      - wallet
+      - custody
+      - chains
+      - ledger
+      - balances
+      - transactions
+      - contacts
+      - ai
+      - notifications
+      - pricing
+      - admin
+      - shared
+      - deploy
+  title:
+    type: string
+    minLength: 5
+  complexity:
+    type: string
+    enum: [S, M, L]
+  sdd_mode:
+    type: string
+    enum: [strict, lightweight]
+  estimated_hours:
+    type: integer
+    minimum: 1
+    maximum: 40
+  state:
+    type: string
+    enum: [ready, in_progress, review, merged, blocked, obsolete]
+  depends_on:
+    type: array
+    items:
+      type: string
+      pattern: "^phase[1-4]-[a-z]+-[0-9]{3}$"
+  blocks:
+    type: array
+    items:
+      type: string
+      pattern: "^phase[1-4]-[a-z]+-[0-9]{3}$"
+  touches_adrs:
+    type: array
+    items:
+      type: string
+      pattern: "^ADR-[0-9]{3}$"
+  ac_count:
+    type: integer
+    minimum: 1
