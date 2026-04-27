@@ -1,0 +1,9 @@
+# Phase pointer — hand-mutable input to manifest generation.
+# This is the ONLY file other than brief frontmatter that mutates manifest state.
+# Mutators:
+#   bootstrap                      → current_phase: 1, phase_state: in_progress
+#   /autonomous-build (last brief) → phase_state: awaiting_{N+1}_approval
+#   /approve-phase <N>             → current_phase: <N>, phase_state: in_progress
+#   gen_manifest.py post-Phase-4   → phase_state: complete
+current_phase: 1
+phase_state: in_progress
