@@ -10,7 +10,7 @@ estimated_hours: 4
 id: phase1-shared-006
 phase: 1
 sdd_mode: strict
-state: in_progress
+state: merged
 title: Idempotency middleware (Redis-backed dual-layer)
 touches_adrs: []
 ---
