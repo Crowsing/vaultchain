@@ -1,22 +1,22 @@
 ---
-id: phase1-admin-002
-phase: 1
-context: admin
-title: Admin auth (password + TOTP) + session
+ac_count: 4
+blocks:
+- phase1-admin-003
 complexity: M
-sdd_mode: strict
-estimated_hours: 4
-state: ready
+context: admin
 depends_on:
 - phase1-identity-001
 - phase1-identity-003
 - phase1-identity-004
 - phase1-shared-005
 - phase1-admin-001
-blocks:
-- phase1-admin-003
+estimated_hours: 4
+id: phase1-admin-002
+phase: 1
+sdd_mode: strict
+state: in_progress
+title: Admin auth (password + TOTP) + session
 touches_adrs: []
-ac_count: 4
 ---
 
 # Brief: phase1-admin-002 — Admin auth (password + TOTP) + session
