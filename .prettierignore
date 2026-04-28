@@ -1,0 +1,11 @@
+# Auto-generated artefacts — do not format.
+shared-types/src/index.ts
+docs/api-contract.yaml
+docs/errors-reference.md
+docs/briefs/manifest.yaml
+docs/briefs/dependency-graph.mmd
+
+# Build output / vendor
+**/dist/
+**/node_modules/
+backend/.venv/

@@ -2,15 +2,21 @@
   "name": "@vaultchain/shared-types",
   "private": true,
   "version": "0.1.0",
-  "main": "index.d.ts",
-  "types": "index.d.ts",
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "scripts": {
     "lint": "echo 'shared-types: no lint needed'",
     "typecheck": "tsc --noEmit",
     "test": "echo 'shared-types: no tests'",
-    "build": "echo 'shared-types: codegen runs in CI'"
+    "build": "openapi-typescript ../docs/api-contract.yaml -o src/index.ts",
+    "check-fresh": "node ../scripts/check_shared_types_fresh.mjs"
   },
   "devDependencies": {
+    "openapi-typescript": "^7.13.0",
     "typescript": "^5.6.3"
   }
 }
