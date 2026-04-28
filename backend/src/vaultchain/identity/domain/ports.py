@@ -107,6 +107,32 @@ class RefreshTokenGenerator(Protocol):
 
 
 @runtime_checkable
+class EmailSender(Protocol):
+    """Sends transactional emails. V1 adapter prints to console (Resend/Postmark
+    deferred to Phase 2 per `00-product-identity.md`). The port is the seam
+    that lets a Phase-2 swap-in stay drop-in.
+    """
+
+    async def send_magic_link(
+        self,
+        *,
+        to_email: str,
+        raw_token: str,
+        mode: str,
+    ) -> None: ...
+
+
+@runtime_checkable
+class MagicLinkTokenGenerator(Protocol):
+    """Pluggable magic-link token issuance — production uses
+    ``secrets.token_urlsafe`` (32 bytes), tests inject a deterministic
+    sequence so we can assert on token text in test fixtures.
+    """
+
+    def generate(self) -> str: ...
+
+
+@runtime_checkable
 class BackupCodeService(Protocol):
     """Generates and validates one-time backup codes.
 
@@ -125,7 +151,9 @@ __all__ = [
     "AccessTokenCache",
     "BackupCodeService",
     "CachedAccessToken",
+    "EmailSender",
     "MagicLinkRepository",
+    "MagicLinkTokenGenerator",
     "RefreshTokenGenerator",
     "SessionRepository",
     "TotpCodeChecker",

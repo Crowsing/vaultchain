@@ -15,6 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from vaultchain.identity.domain.aggregates import (
     MagicLink,
+    MagicLinkMode,
     Session,
     TotpSecret,
     User,
@@ -226,7 +227,7 @@ class SqlAlchemyMagicLinkRepository:
             id=row.id,
             user_id=row.user_id,
             token_hash=bytes(row.token_hash),
-            mode=row.mode,
+            mode=MagicLinkMode(row.mode),
             created_at=row.created_at,
             expires_at=row.expires_at,
             consumed_at=row.consumed_at,

@@ -1,5 +1,5 @@
 ---
-ac_count: 3
+ac_count: 10
 blocks:
 - phase1-identity-005
 complexity: L
@@ -11,7 +11,7 @@ estimated_hours: 4
 id: phase1-identity-002
 phase: 1
 sdd_mode: strict
-state: ready
+state: in_progress
 title: Magic-link signup/login flow + email port + console adapter
 touches_adrs: []
 ---
