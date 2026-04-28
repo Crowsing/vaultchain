@@ -3,8 +3,7 @@ phase_state: in_progress
 counts:
   total: 67
   by_state:
-    in_progress: 1
-    merged: 10
+    merged: 11
     ready: 56
   by_phase:
     1: 18
@@ -174,7 +173,7 @@ briefs:
   title: Auth API endpoints + OpenAPI
   complexity: M
   sdd_mode: strict
-  state: in_progress
+  state: merged
   depends_on:
   - phase1-identity-002
   - phase1-identity-003
