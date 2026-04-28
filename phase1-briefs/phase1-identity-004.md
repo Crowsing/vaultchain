@@ -1,5 +1,5 @@
 ---
-ac_count: 2
+ac_count: 10
 blocks:
 - phase1-identity-005
 - phase1-admin-002
@@ -12,7 +12,7 @@ estimated_hours: 4
 id: phase1-identity-004
 phase: 1
 sdd_mode: strict
-state: ready
+state: in_progress
 title: Session management — cookies, CSRF, refresh-token rotation
 touches_adrs:
 - ADR-002
