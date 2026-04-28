@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 
 export type Theme = "light" | "dark";
 
-const STORAGE_KEY = "vc:theme";
+const STORAGE_KEY = "vc-theme";
 
 function readStoredTheme(): Theme | null {
   if (typeof window === "undefined") return null;

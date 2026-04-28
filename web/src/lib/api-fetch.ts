@@ -15,6 +15,8 @@
 
 import type { paths } from "@vaultchain/shared-types";
 
+import { sessionEvents } from "@/auth/session-events";
+
 import { ApiError } from "./api-error";
 import {
   evictIdempotencyKey,
@@ -173,7 +175,15 @@ export async function apiFetch(
   }
 
   if (!response.ok) {
-    throw await parseError(response);
+    const error = await parseError(response);
+    if (response.status === 401) {
+      sessionEvents.dispatchEvent(
+        new CustomEvent("session:expired", {
+          detail: { code: error.code, status: error.status },
+        }),
+      );
+    }
+    throw error;
   }
 
   if (response.status === 204) return undefined;

@@ -40,15 +40,15 @@ describe("ThemeToggle", () => {
     expect(document.documentElement.getAttribute("data-theme")).toBe("light");
   });
 
-  it("persists choice to localStorage under vc:theme", async () => {
+  it("persists choice to localStorage under vc-theme", async () => {
     const user = userEvent.setup();
     render(<ThemeToggle />);
     await user.click(screen.getByTestId("theme-toggle"));
-    expect(window.localStorage.getItem("vc:theme")).toBe("dark");
+    expect(window.localStorage.getItem("vc-theme")).toBe("dark");
   });
 
   it("hydrates from localStorage when present", () => {
-    window.localStorage.setItem("vc:theme", "dark");
+    window.localStorage.setItem("vc-theme", "dark");
     render(<ThemeToggle />);
     expect(document.documentElement.getAttribute("data-theme")).toBe("dark");
   });
