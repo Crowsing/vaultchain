@@ -13,6 +13,7 @@ from typing import ClassVar
 from uuid import UUID
 
 from vaultchain.shared.events.base import DomainEvent
+from vaultchain.shared.events.registry import register_event
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -45,6 +46,7 @@ class MagicLinkConsumed(DomainEvent):
     event_type: ClassVar[str] = "identity.magic_link_consumed"
 
 
+@register_event
 @dataclass(frozen=True, kw_only=True)
 class TotpEnrolled(DomainEvent):
     user_id: UUID
@@ -52,12 +54,34 @@ class TotpEnrolled(DomainEvent):
     event_type: ClassVar[str] = "identity.totp_enrolled"
 
 
+@register_event
 @dataclass(frozen=True, kw_only=True)
 class TotpVerified(DomainEvent):
     user_id: UUID
     last_verified_at: datetime
     aggregate_type: ClassVar[str] = "totp_secret"
     event_type: ClassVar[str] = "identity.totp_verified"
+
+
+@register_event
+@dataclass(frozen=True, kw_only=True)
+class TotpVerificationFailed(DomainEvent):
+    """Captured per failed TOTP attempt; the lockout handler subscribes."""
+
+    user_id: UUID
+    failed_attempts: int
+    aggregate_type: ClassVar[str] = "user"
+    event_type: ClassVar[str] = "identity.totp_verification_failed"
+
+
+@register_event
+@dataclass(frozen=True, kw_only=True)
+class UserLockedDueToTotpFailures(DomainEvent):
+    """Captured by the User aggregate when the lockout transition fires."""
+
+    locked_until: datetime
+    aggregate_type: ClassVar[str] = "user"
+    event_type: ClassVar[str] = "identity.user_locked_due_to_totp_failures"
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -85,7 +109,9 @@ __all__ = [
     "SessionCreated",
     "SessionRevoked",
     "TotpEnrolled",
+    "TotpVerificationFailed",
     "TotpVerified",
     "UserLocked",
+    "UserLockedDueToTotpFailures",
     "UserSignedUp",
 ]

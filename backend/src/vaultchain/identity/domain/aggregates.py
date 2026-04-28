@@ -9,9 +9,9 @@ them to the UoW (which then writes them atomically to `shared.domain_events`).
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from enum import Enum
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Final, Literal
 from uuid import UUID, uuid4
 
 from vaultchain.identity.domain.errors import (
@@ -37,6 +37,11 @@ class UserStatus(str, Enum):
 
 MagicLinkMode = Literal["signup", "login"]
 
+#: Wrong TOTP attempts permitted before the lockout transition fires.
+TOTP_LOCKOUT_THRESHOLD: Final[int] = 5
+#: Self-healing lockout window per AC-phase1-identity-003-06/07.
+TOTP_LOCKOUT_WINDOW: Final[timedelta] = timedelta(minutes=15)
+
 
 @dataclass
 class User:
@@ -48,6 +53,8 @@ class User:
     version: int = 0
     created_at: datetime = field(default_factory=_utc_now)
     updated_at: datetime | None = None
+    failed_totp_attempts: int = 0
+    locked_until: datetime | None = None
     _pending_events: list[DomainEvent] = field(default_factory=list, repr=False, compare=False)
 
     @classmethod
@@ -79,6 +86,72 @@ class User:
         self.version += 1
         self.updated_at = _utc_now()
         self._pending_events.append(UserLocked(aggregate_id=self.id, reason=reason))
+
+    def record_totp_failure(self, *, now: datetime | None = None) -> None:
+        """Increment the TOTP failure counter (state-only; no event emitted).
+
+        The lockout transition is owned by ``lock_due_to_totp_failures``,
+        which the lockout-handler invokes when the threshold is reached.
+        Per the brief, going through the event bus keeps the transition
+        observable.
+        """
+        self.failed_totp_attempts += 1
+        self.version += 1
+        self.updated_at = now or _utc_now()
+
+    def lock_due_to_totp_failures(self, *, now: datetime | None = None) -> None:
+        """Apply the 15-min self-healing lockout (AC-phase1-identity-003-06).
+
+        Idempotent: re-invoking while ``is_locked_now()`` is True is a no-op.
+        Raises if the threshold has not been reached, so we don't paper over
+        a wiring bug in the handler.
+        """
+        from vaultchain.identity.domain.events import UserLockedDueToTotpFailures
+
+        moment = now or _utc_now()
+        if self.is_locked_now(now=moment):
+            return
+        if self.failed_totp_attempts < TOTP_LOCKOUT_THRESHOLD:
+            raise InvalidStateTransition(
+                details={
+                    "from": self.status.value,
+                    "reason": "totp_failure_threshold_not_reached",
+                    "failed_totp_attempts": self.failed_totp_attempts,
+                }
+            )
+        self.locked_until = moment + TOTP_LOCKOUT_WINDOW
+        self.status = UserStatus.LOCKED
+        self.version += 1
+        self.updated_at = moment
+        self._pending_events.append(
+            UserLockedDueToTotpFailures(
+                aggregate_id=self.id,
+                locked_until=self.locked_until,
+            )
+        )
+
+    def is_locked_now(self, *, now: datetime | None = None) -> bool:
+        if self.locked_until is None:
+            return False
+        return self.locked_until > (now or _utc_now())
+
+    def clear_totp_failures(self, *, now: datetime | None = None) -> None:
+        """Reset the lockout state machine on a successful verification.
+
+        Used both by the standard success path (resets a non-zero counter)
+        and the self-healing path (AC-phase1-identity-003-07: lockout window
+        elapsed → counter cleared and the user becomes verified again).
+        No-op when already clean.
+        """
+        if self.failed_totp_attempts == 0 and self.locked_until is None:
+            return
+        was_locked = self.status is UserStatus.LOCKED
+        self.failed_totp_attempts = 0
+        self.locked_until = None
+        if was_locked:
+            self.status = UserStatus.VERIFIED
+        self.version += 1
+        self.updated_at = now or _utc_now()
 
     def pull_events(self) -> tuple[DomainEvent, ...]:
         out = tuple(self._pending_events)
@@ -164,6 +237,8 @@ class TotpSecret:
 
 
 __all__ = [
+    "TOTP_LOCKOUT_THRESHOLD",
+    "TOTP_LOCKOUT_WINDOW",
     "MagicLink",
     "MagicLinkMode",
     "Session",

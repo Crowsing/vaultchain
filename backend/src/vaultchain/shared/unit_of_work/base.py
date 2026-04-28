@@ -8,7 +8,7 @@ directly, so domain code never imports infra. The concrete adapter lives in
 from __future__ import annotations
 
 from types import TracebackType
-from typing import Protocol, runtime_checkable
+from typing import Any, Protocol, runtime_checkable
 
 from vaultchain.shared.events.base import DomainEvent
 
@@ -24,6 +24,16 @@ class AbstractUnitOfWork(Protocol):
             await uow.commit()    # writes events alongside aggregate rows
                                   # __aexit__: close session (auto-rollback if body raised)
     """
+
+    @property
+    def session(self) -> Any:
+        """Session-like handle that repository factories bind to.
+
+        Typed `Any` so the Protocol stays database-agnostic; the concrete
+        adapter exposes `AsyncSession`, the in-memory test fake exposes a
+        sentinel that the test repo factory ignores.
+        """
+        ...
 
     async def __aenter__(self) -> AbstractUnitOfWork: ...
 

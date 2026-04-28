@@ -30,6 +30,10 @@ def test_uow_protocol_runtime_checkable_against_duck_type() -> None:
     from vaultchain.shared.unit_of_work.base import AbstractUnitOfWork
 
     class _Shim:
+        @property
+        def session(self) -> object:
+            return object()
+
         async def __aenter__(self) -> object:
             return self
 

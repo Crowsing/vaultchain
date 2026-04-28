@@ -93,6 +93,9 @@ async def test_ac_01_users_table_columns_match_spec(migrated_engine: object) -> 
         "version",
         "created_at",
         "updated_at",
+        # Added by phase1-identity-003 lockout-columns migration; head includes both.
+        "failed_totp_attempts",
+        "locked_until",
     }
     assert set(cols) == expected
     assert cols["email"]["nullable"] == "NO"

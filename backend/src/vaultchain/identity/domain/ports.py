@@ -52,9 +52,38 @@ class TotpSecretEncryptor(Protocol):
     def decrypt(self, ciphertext: bytes) -> bytes: ...
 
 
+@runtime_checkable
+class TotpCodeChecker(Protocol):
+    """Generates TOTP secrets, verifies user-provided codes, and renders
+    the otpauth URI consumed by authenticator apps. Production adapter
+    wraps `pyotp`; tests inject a deterministic fake.
+    """
+
+    def generate_secret(self) -> bytes: ...
+    def verify(self, secret: bytes, code: str) -> bool: ...
+    def qr_payload_uri(self, *, email: str, secret: bytes) -> str: ...
+
+
+@runtime_checkable
+class BackupCodeService(Protocol):
+    """Generates and validates one-time backup codes.
+
+    The plaintext is shown to the user exactly once at enrollment (or
+    regeneration); only argon2id hashes are persisted. The service
+    finds a matching hash so the use case can remove it from the
+    user's stored list (one-time use, AC-phase1-identity-003-08).
+    """
+
+    def generate(self, count: int = 10) -> list[str]: ...
+    def hash(self, code: str) -> bytes: ...
+    def find_matching_hash(self, code: str, hashes: list[bytes]) -> bytes | None: ...
+
+
 __all__ = [
+    "BackupCodeService",
     "MagicLinkRepository",
     "SessionRepository",
+    "TotpCodeChecker",
     "TotpSecretEncryptor",
     "TotpSecretRepository",
     "UserRepository",
