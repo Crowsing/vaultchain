@@ -76,7 +76,7 @@ The route set covers exactly what the auth state machine in `auth-onboarding-not
 ## Out of Scope
 
 - Demo-user "Try as demo" route: separate Phase 4 brief.
-- Admin auth routes: `phase1-admin-002`.
+- Admin auth routes: `phase1-admin-002a`.
 - Rate limiting at the route level: middleware in Phase 2.
 - "New device detected" branch: Phase 4 polish.
 - Resend email button rate limiting (the 30s countdown in the auth UX): client-side concern; backend simply allows replays.

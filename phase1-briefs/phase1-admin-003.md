@@ -9,7 +9,8 @@ estimated_hours: 4
 state: ready
 depends_on:
 - phase1-admin-001
-- phase1-admin-002
+- phase1-admin-002a
+- phase1-admin-002b
 blocks:
 - phase1-deploy-001
 touches_adrs: []
@@ -75,7 +76,7 @@ The header shows the admin's email + a logout button. Logout calls `POST /admin/
 
 ## Dependencies
 
-- **Code dependencies:** `phase1-admin-001` (shell + routing), `phase1-admin-002` (login + session + /me + logout endpoints).
+- **Code dependencies:** `phase1-admin-001` (shell + routing), `phase1-admin-002a` (login + session + /me + logout endpoints), `phase1-admin-002b` (login/totp routes that produce a hydrated session before the dashboard renders).
 - **Data dependencies:** none.
 - **External dependencies:** none new.
 

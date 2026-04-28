@@ -1,18 +1,18 @@
 current_phase: 1
 phase_state: in_progress
 counts:
-  total: 67
+  total: 69
   by_state:
-    blocked: 1
     merged: 15
-    ready: 51
+    obsolete: 1
+    ready: 53
   by_phase:
-    1: 18
+    1: 20
     2: 17
     3: 19
     4: 13
   by_context:
-    admin: 7
+    admin: 9
     ai: 10
     audit: 1
     balances: 1
@@ -40,7 +40,7 @@ briefs:
   state: merged
   depends_on: []
   blocks:
-  - phase1-admin-002
+  - phase1-admin-002b
   - phase1-admin-003
   touches_adrs: []
   ac_count: 8
@@ -49,22 +49,53 @@ briefs:
 - id: phase1-admin-002
   phase: 1
   context: admin
-  title: Admin auth (password + TOTP) + session
+  title: Admin auth (password + TOTP) + session — SPLIT into 002a (backend) + 002b
+    (frontend)
   complexity: M
   sdd_mode: strict
-  state: blocked
+  state: obsolete
+  depends_on: []
+  blocks: []
+  touches_adrs: []
+  ac_count: 4
+  estimated_hours: 4
+  path: phase1-briefs/phase1-admin-002.md
+- id: phase1-admin-002a
+  phase: 1
+  context: admin
+  title: Admin auth backend (password+TOTP, session, seed CLI)
+  complexity: M
+  sdd_mode: strict
+  state: ready
   depends_on:
   - phase1-identity-001
   - phase1-identity-003
   - phase1-identity-004
   - phase1-shared-005
+  - phase1-shared-006
+  blocks:
+  - phase1-admin-002b
+  - phase1-admin-003
+  touches_adrs: []
+  ac_count: 7
+  estimated_hours: 4
+  path: phase1-briefs/phase1-admin-002a.md
+- id: phase1-admin-002b
+  phase: 1
+  context: admin
+  title: Admin auth frontend (login + TOTP routes)
+  complexity: S
+  sdd_mode: lightweight
+  state: ready
+  depends_on:
   - phase1-admin-001
+  - phase1-admin-002a
   blocks:
   - phase1-admin-003
   touches_adrs: []
-  ac_count: 4
-  estimated_hours: 4
-  path: phase1-briefs/phase1-admin-002.md
+  ac_count: 3
+  estimated_hours: 3
+  path: phase1-briefs/phase1-admin-002b.md
 - id: phase1-admin-003
   phase: 1
   context: admin
@@ -74,7 +105,8 @@ briefs:
   state: ready
   depends_on:
   - phase1-admin-001
-  - phase1-admin-002
+  - phase1-admin-002a
+  - phase1-admin-002b
   blocks:
   - phase1-deploy-001
   touches_adrs: []
@@ -112,7 +144,7 @@ briefs:
   - phase1-identity-002
   - phase1-identity-003
   - phase1-identity-004
-  - phase1-admin-002
+  - phase1-admin-002a
   touches_adrs: []
   ac_count: 9
   estimated_hours: 4
@@ -145,7 +177,7 @@ briefs:
   - phase1-shared-003
   blocks:
   - phase1-identity-005
-  - phase1-admin-002
+  - phase1-admin-002a
   touches_adrs: []
   ac_count: 10
   estimated_hours: 4
@@ -162,7 +194,7 @@ briefs:
   - phase1-shared-003
   blocks:
   - phase1-identity-005
-  - phase1-admin-002
+  - phase1-admin-002a
   touches_adrs:
   - ADR-002
   ac_count: 10
@@ -233,7 +265,8 @@ briefs:
   depends_on: []
   blocks:
   - phase1-identity-005
-  - phase1-admin-002
+  - phase1-admin-002a
+  - phase1-admin-002b
   - phase1-shared-006
   touches_adrs: []
   ac_count: 8
@@ -250,6 +283,7 @@ briefs:
   - phase1-shared-005
   blocks:
   - phase1-identity-005
+  - phase1-admin-002a
   touches_adrs: []
   ac_count: 8
   estimated_hours: 4
