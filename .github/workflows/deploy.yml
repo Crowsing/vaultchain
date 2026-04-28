@@ -82,6 +82,10 @@ jobs:
         with:
           name: admin-dist
           path: admin-dist
+      - name: Compute lowercase image ref
+        run: |
+          OWNER_LC=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          echo "VAULTCHAIN_IMAGE=${{ env.REGISTRY }}/${OWNER_LC}/vaultchain-api:sha-${{ github.sha }}" >> $GITHUB_ENV
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
@@ -99,7 +103,7 @@ jobs:
       - name: Run deploy script on VM
         run: |
           ssh deploy@${{ secrets.HETZNER_HOST }} \
-              "VAULTCHAIN_IMAGE=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }} bash /opt/vaultchain/deploy-server.sh"
+              "VAULTCHAIN_IMAGE=${{ env.VAULTCHAIN_IMAGE }} bash /opt/vaultchain/deploy-server.sh"
       - name: Healthz smoke
         run: |
           for i in {1..24}; do
