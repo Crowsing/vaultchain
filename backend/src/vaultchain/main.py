@@ -30,7 +30,7 @@ from vaultchain.identity.delivery.composition import (
     install_identity_dependencies,
     shutdown_identity_dependencies,
 )
-from vaultchain.identity.delivery.routes import build_identity_router
+from vaultchain.identity.delivery.routes import build_admin_router, build_identity_router
 from vaultchain.shared.delivery import RequestIdMiddleware, register_error_handlers
 from vaultchain.shared.delivery.idempotency import IdempotencyMiddleware
 from vaultchain.shared.infra.idempotency import RedisIdempotencyStore
@@ -105,6 +105,7 @@ def create_app() -> FastAPI:
     _install_idempotency_openapi(app)
     install_identity_dependencies(app, settings)
     app.include_router(build_identity_router())
+    app.include_router(build_admin_router())
 
     @app.get("/healthz")
     async def healthz() -> dict[str, str]:

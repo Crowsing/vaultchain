@@ -23,6 +23,8 @@ from fastapi import FastAPI, Request
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from vaultchain.config import Settings, get_settings
+from vaultchain.identity.application.admin_login import AdminLogin
+from vaultchain.identity.application.admin_totp_verify import AdminTotpVerify
 from vaultchain.identity.application.consume_magic_link import ConsumeMagicLink
 from vaultchain.identity.application.create_session import CreateSession
 from vaultchain.identity.application.enroll_totp import EnrollTotp
@@ -31,15 +33,21 @@ from vaultchain.identity.application.regenerate_backup_codes import RegenerateBa
 from vaultchain.identity.application.request_magic_link import RequestMagicLink
 from vaultchain.identity.application.revoke_session import RevokeSession
 from vaultchain.identity.application.verify_totp import VerifyTotp
+from vaultchain.identity.delivery.dependencies.admin_user import (
+    AdminContext,
+    GetCurrentAdmin,
+)
 from vaultchain.identity.delivery.dependencies.csrf import CsrfGuard
 from vaultchain.identity.delivery.dependencies.current_user import GetCurrentUser
 from vaultchain.identity.domain.ports import (
     AccessTokenCache,
     EmailSender,
     MagicLinkTokenGenerator,
+    PasswordHasher,
     PreTotpTokenCache,
     RefreshTokenGenerator,
 )
+from vaultchain.identity.infra.bcrypt_password_hasher import BcryptPasswordHasher
 from vaultchain.identity.infra.email.console import ConsoleEmailSender
 from vaultchain.identity.infra.repositories import (
     SqlAlchemyMagicLinkRepository,
@@ -83,6 +91,7 @@ def install_identity_dependencies(app: FastAPI, settings: Settings) -> None:
     )
     app.state.identity_totp_checker = PyOtpCodeChecker()
     app.state.identity_backup_codes = Argon2BackupCodeService()
+    app.state.identity_password_hasher = BcryptPasswordHasher()
 
 
 async def shutdown_identity_dependencies(app: FastAPI) -> None:
@@ -240,6 +249,37 @@ async def get_current_user(request: Request) -> Any:
     return await gcu(request)
 
 
+async def get_current_admin(request: Request) -> AdminContext:
+    """Resolve the current admin via the GetCurrentAdmin callable."""
+    gca = GetCurrentAdmin(
+        cache=get_access_cache(request),
+        uow_factory=get_uow_factory(request),
+        users=get_user_repo_factory(request),
+    )
+    return await gca(request)
+
+
+def get_password_hasher(request: Request) -> PasswordHasher:
+    return cast(PasswordHasher, _state(request, "identity_password_hasher"))
+
+
+def get_admin_login(request: Request) -> AdminLogin:
+    return AdminLogin(
+        uow_factory=get_uow_factory(request),
+        users=get_user_repo_factory(request),
+        password_hasher=get_password_hasher(request),
+    )
+
+
+def get_admin_totp_verify(request: Request) -> AdminTotpVerify:
+    return AdminTotpVerify(
+        uow_factory=get_uow_factory(request),
+        users=get_user_repo_factory(request),
+        verify_totp=get_verify_totp(request),
+        create_session=get_create_session(request),
+    )
+
+
 def get_csrf_guard(_request: Request) -> CsrfGuard:
     return CsrfGuard()
 
@@ -252,13 +292,17 @@ def get_app_settings(_request: Request) -> Settings:
 
 __all__ = [
     "get_access_cache",
+    "get_admin_login",
+    "get_admin_totp_verify",
     "get_app_settings",
     "get_consume_magic_link",
     "get_create_session",
     "get_csrf_guard",
-    "get_enroll_totp",
+    "get_current_admin",
     "get_current_user",
+    "get_enroll_totp",
     "get_magic_link_token_gen",
+    "get_password_hasher",
     "get_pre_totp_cache",
     "get_refresh_session",
     "get_regenerate_backup_codes",

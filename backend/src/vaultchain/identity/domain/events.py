@@ -126,12 +126,44 @@ class SessionRevoked(DomainEvent):
     event_type: ClassVar[str] = "identity.session_revoked"
 
 
+@register_event
+@dataclass(frozen=True, kw_only=True)
+class UserAuthenticated(DomainEvent):
+    """Emitted on successful login — both user-side magic-link and admin-side
+    password+TOTP. ``actor_type`` discriminates the caller.
+    """
+
+    actor_type: str
+    aggregate_type: ClassVar[str] = "user"
+    event_type: ClassVar[str] = "identity.user_authenticated"
+
+
+@register_event
+@dataclass(frozen=True, kw_only=True)
+class AdminAuthenticated(DomainEvent):
+    """Audit-context event published on admin login per AC-phase1-admin-002a-07.
+
+    Lives in `audit.*` namespace because the audit context will own the
+    consumer in Phase 2; the outbox holds it until then. Registering at
+    boot keeps the dispatcher honest — late-binding subscribers do not
+    require unregistered events to circulate.
+    """
+
+    admin_id: UUID
+    ip: str | None = None
+    user_agent: str = ""
+    login_at: datetime
+    aggregate_type: ClassVar[str] = "admin"
+    event_type: ClassVar[str] = "audit.admin_authenticated"
+
+
 # Pulling `field` so import-organizers don't drop it; subclasses below may
 # add fields with defaults via `field(default_factory=...)` if extended.
 _ = field
 
 
 __all__ = [
+    "AdminAuthenticated",
     "MagicLinkConsumed",
     "MagicLinkRequested",
     "SessionCreated",
@@ -140,6 +172,7 @@ __all__ = [
     "TotpEnrolled",
     "TotpVerificationFailed",
     "TotpVerified",
+    "UserAuthenticated",
     "UserLocked",
     "UserLockedDueToTotpFailures",
     "UserSignedUp",

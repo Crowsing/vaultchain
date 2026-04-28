@@ -5,7 +5,8 @@ counts:
   by_state:
     merged: 15
     obsolete: 1
-    ready: 53
+    ready: 52
+    review: 1
   by_phase:
     1: 20
     2: 17
@@ -66,7 +67,7 @@ briefs:
   title: Admin auth backend (password+TOTP, session, seed CLI)
   complexity: M
   sdd_mode: strict
-  state: ready
+  state: review
   depends_on:
   - phase1-identity-001
   - phase1-identity-003

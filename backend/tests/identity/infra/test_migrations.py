@@ -96,6 +96,11 @@ async def test_ac_01_users_table_columns_match_spec(migrated_engine: object) -> 
         # Added by phase1-identity-003 lockout-columns migration; head includes both.
         "failed_totp_attempts",
         "locked_until",
+        # Added by phase1-admin-002a admin-user-columns migration.
+        "password_hash",
+        "actor_type",
+        "metadata",
+        "login_failure_count",
     }
     assert set(cols) == expected
     assert cols["email"]["nullable"] == "NO"
@@ -104,6 +109,11 @@ async def test_ac_01_users_table_columns_match_spec(migrated_engine: object) -> 
     assert cols["kyc_tier"]["nullable"] == "NO"
     assert cols["version"]["nullable"] == "NO"
     assert cols["updated_at"]["nullable"] == "YES"
+    # Admin columns: only `password_hash` is nullable (user-actor rows leave it NULL).
+    assert cols["password_hash"]["nullable"] == "YES"
+    assert cols["actor_type"]["nullable"] == "NO"
+    assert cols["metadata"]["nullable"] == "NO"
+    assert cols["login_failure_count"]["nullable"] == "NO"
 
 
 @pytest.mark.asyncio
@@ -235,6 +245,53 @@ async def test_ac_01_totp_secrets_columns_and_user_id_unique(migrated_engine: ob
             )
         ).all()
     assert any("user_id" in r[0] for r in rows)
+
+
+@pytest.mark.asyncio
+async def test_admin_002a_actor_type_check_constraint(migrated_engine: object) -> None:
+    """phase1-admin-002a — `users.actor_type` CHECK locks the value space."""
+    engine = migrated_engine
+    async with engine.connect() as conn:  # type: ignore[attr-defined]
+        rows = (
+            await conn.execute(
+                sa.text(
+                    "SELECT conname FROM pg_constraint "
+                    "WHERE contype='c' AND conrelid='identity.users'::regclass"
+                )
+            )
+        ).all()
+    assert any(r[0] == "ck_users_actor_type" for r in rows)
+
+
+@pytest.mark.asyncio
+async def test_admin_002a_columns_have_safe_defaults(migrated_engine: object) -> None:
+    """Existing user rows must backfill cleanly with defaults — additive only."""
+    engine = migrated_engine
+    async with engine.begin() as conn:  # type: ignore[attr-defined]
+        await conn.execute(
+            sa.text(
+                "INSERT INTO identity.users (id, email, email_hash, status) "
+                "VALUES (gen_random_uuid(), 'legacy@example.com', "
+                "decode('00','hex'), 'unverified')"
+            )
+        )
+        row = (
+            await conn.execute(
+                sa.text(
+                    "SELECT actor_type, login_failure_count, password_hash, metadata "
+                    "FROM identity.users WHERE email='legacy@example.com'"
+                )
+            )
+        ).one()
+    assert row[0] == "user"
+    assert row[1] == 0
+    assert row[2] is None
+    # metadata default is `'{}'::jsonb`; asyncpg returns dict or str depending
+    # on codec, both should evaluate to an empty mapping.
+    if isinstance(row[3], str):
+        assert row[3] in ("{}", "{} ")
+    else:
+        assert row[3] == {} or row[3] == "{}"
 
 
 @pytest.mark.asyncio

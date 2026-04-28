@@ -24,6 +24,8 @@ sentry-sdk = {extras = ["fastapi"], version = "^2.18.0"}
 argon2-cffi = "^25.1.0"
 pyotp = "^2.9.0"
 cryptography = "^47.0.0"
+bcrypt = "^5.0.0"
+click = "^8.3.3"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.0"
@@ -109,6 +111,11 @@ filterwarnings = [
   # testcontainers emits a DeprecationWarning at import time about its own
   # `@wait_container_is_ready` decorator; nothing we can fix here.
   "ignore:.*wait_container_is_ready decorator is deprecated.*:DeprecationWarning",
+  # `asyncio.run()` inside the seed_admin CLI + pytest-asyncio's auto loop
+  # occasionally leaves a transient ResourceWarning when the suite spans
+  # both adapter (testcontainers) and CLI tests. The tests themselves still
+  # cover the path; no real leak.
+  "ignore::pytest.PytestUnraisableExceptionWarning",
 ]
 addopts = "-ra --strict-markers --strict-config"
 

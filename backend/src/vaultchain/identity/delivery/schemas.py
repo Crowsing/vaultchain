@@ -186,7 +186,91 @@ class MeResponse(BaseModel):
     created_at: datetime = Field(..., examples=["2026-04-28T09:00:00+00:00"])
 
 
+# --------------------------- /admin/api/v1/auth/* ------------------------
+
+
+class AdminLoginBody(BaseModel):
+    model_config = _STRICT
+    email: str = Field(..., min_length=3, max_length=254, examples=["admin@vaultchain.io"])
+    password: str = Field(..., min_length=12, max_length=256, examples=["s3cret-passphrase!"])
+
+
+class AdminLoginResponse(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+        json_schema_extra={"example": {"pre_totp_required": True}},
+    )
+
+    pre_totp_required: bool = Field(..., examples=[True])
+
+
+class AdminTotpVerifyBody(BaseModel):
+    model_config = _STRICT
+    code: str = Field(..., min_length=6, max_length=64, examples=["123456"])
+
+
+class AdminUserSummary(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+        json_schema_extra={
+            "example": {
+                "id": "22222222-2222-2222-2222-222222222222",
+                "email": "admin@vaultchain.io",
+                "actor_type": "admin",
+            }
+        },
+    )
+
+    id: UUID = Field(..., examples=["22222222-2222-2222-2222-222222222222"])
+    email: str = Field(..., min_length=3, max_length=254, examples=["admin@vaultchain.io"])
+    actor_type: str = Field(..., examples=["admin"])
+
+
+class AdminTotpVerifyResponse(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+        json_schema_extra={
+            "example": {
+                "user": {
+                    "id": "22222222-2222-2222-2222-222222222222",
+                    "email": "admin@vaultchain.io",
+                    "actor_type": "admin",
+                }
+            }
+        },
+    )
+
+    user: AdminUserSummary
+
+
+class AdminMeResponse(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+        json_schema_extra={
+            "example": {
+                "id": "22222222-2222-2222-2222-222222222222",
+                "email": "admin@vaultchain.io",
+                "full_name": "Demo Admin",
+                "role": "admin",
+                "last_login_at": None,
+            }
+        },
+    )
+
+    id: UUID = Field(..., examples=["22222222-2222-2222-2222-222222222222"])
+    email: str = Field(..., min_length=3, max_length=254, examples=["admin@vaultchain.io"])
+    full_name: str = Field(..., examples=["Demo Admin"])
+    role: str = Field(..., examples=["admin"])
+    last_login_at: datetime | None = Field(default=None, examples=[None])
+
+
 __all__ = [
+    "AdminLoginBody",
+    "AdminLoginResponse",
+    "AdminMeResponse",
+    "AdminTotpVerifyBody",
+    "AdminTotpVerifyResponse",
+    "AdminUserSummary",
     "AuthRequestBody",
     "AuthRequestResponse",
     "AuthVerifyBody",

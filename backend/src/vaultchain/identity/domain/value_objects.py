@@ -9,6 +9,7 @@ from __future__ import annotations
 import hashlib
 import re
 from dataclasses import dataclass
+from enum import StrEnum
 
 from vaultchain.shared.domain.errors import ValidationError
 
@@ -56,4 +57,51 @@ class Email:
         return hashlib.blake2b(self.value.encode("utf-8"), digest_size=32).digest()
 
 
-__all__ = ["Email"]
+class ActorType(StrEnum):
+    """Discriminates user vs admin actor rows in ``identity.users``.
+
+    Per project convention (StrEnum over ``str`` / ``Literal[str]``); the
+    DB CHECK constraint mirrors these values.
+    """
+
+    USER = "user"
+    ADMIN = "admin"
+
+
+#: Minimum length per AC-phase1-admin-002a-06 — admins are higher-value
+#: targets and rotation is operator-only via re-running the seed CLI.
+ADMIN_PASSWORD_MIN_LENGTH = 12
+
+
+@dataclass(frozen=True, slots=True)
+class PasswordPolicy:
+    """Plaintext-password validation rules used by the admin seed CLI and
+    AdminLogin. Frozen so the rule snapshot is auditable, not mutable.
+    """
+
+    min_length: int = ADMIN_PASSWORD_MIN_LENGTH
+
+    def validate(self, password: str) -> None:
+        if not password or password.strip() == "":
+            raise ValidationError(
+                "password cannot be empty",
+                details={"field": "password", "rule": "required"},
+            )
+        if len(password) < self.min_length:
+            raise ValidationError(
+                f"password must be at least {self.min_length} characters",
+                details={
+                    "field": "password",
+                    "rule": "min_length",
+                    "min_length": self.min_length,
+                },
+            )
+        # Reject all-whitespace; `strip` above only catches the wholly-empty case.
+        if password.strip() != password and password.strip() == "":
+            raise ValidationError(
+                "password cannot be whitespace-only",
+                details={"field": "password", "rule": "whitespace_only"},
+            )
+
+
+__all__ = ["ADMIN_PASSWORD_MIN_LENGTH", "ActorType", "Email", "PasswordPolicy"]

@@ -7,6 +7,7 @@ includes optimistic-lock plumbing: `UPDATE ... WHERE version=?` and raises
 
 from __future__ import annotations
 
+import json
 from typing import Any
 from uuid import UUID
 
@@ -21,10 +22,18 @@ from vaultchain.identity.domain.aggregates import (
     User,
     UserStatus,
 )
+from vaultchain.identity.domain.value_objects import ActorType
 from vaultchain.shared.domain.errors import StaleAggregate
 
 
 def _user_from_row(row: sa.Row[Any]) -> User:
+    raw_meta = getattr(row, "metadata", None) or {}
+    if isinstance(raw_meta, str):
+        # asyncpg returns JSONB as str when no codec is registered.
+        try:
+            raw_meta = json.loads(raw_meta)
+        except (TypeError, ValueError):
+            raw_meta = {}
     return User(
         id=row.id,
         email=row.email,
@@ -36,6 +45,10 @@ def _user_from_row(row: sa.Row[Any]) -> User:
         updated_at=row.updated_at,
         failed_totp_attempts=row.failed_totp_attempts,
         locked_until=row.locked_until,
+        password_hash=getattr(row, "password_hash", None),
+        actor_type=ActorType(getattr(row, "actor_type", "user")),
+        metadata=dict(raw_meta),
+        login_failure_count=getattr(row, "login_failure_count", 0),
     )
 
 
@@ -47,8 +60,11 @@ class SqlAlchemyUserRepository:
         await self._session.execute(
             sa.text(
                 "INSERT INTO identity.users "
-                "(id, email, email_hash, status, kyc_tier, version, created_at) "
-                "VALUES (:id, :email, :email_hash, :status, :kyc_tier, :version, :created_at)"
+                "(id, email, email_hash, status, kyc_tier, version, created_at, "
+                "password_hash, actor_type, metadata, login_failure_count) "
+                "VALUES (:id, :email, :email_hash, :status, :kyc_tier, :version, "
+                ":created_at, :password_hash, :actor_type, "
+                "CAST(:metadata AS jsonb), :login_failure_count)"
             ),
             {
                 "id": user.id,
@@ -58,6 +74,10 @@ class SqlAlchemyUserRepository:
                 "kyc_tier": user.kyc_tier,
                 "version": user.version,
                 "created_at": user.created_at,
+                "password_hash": user.password_hash,
+                "actor_type": user.actor_type.value,
+                "metadata": json.dumps(user.metadata or {}),
+                "login_failure_count": user.login_failure_count,
             },
         )
 
@@ -85,6 +105,7 @@ class SqlAlchemyUserRepository:
                 "UPDATE identity.users "
                 "SET status=:status, kyc_tier=:kyc_tier, "
                 "failed_totp_attempts=:fail_count, locked_until=:locked_until, "
+                "login_failure_count=:login_fail, "
                 "version=version+1, updated_at=NOW() "
                 "WHERE id=:id AND version=:expected_version"
             ),
@@ -94,6 +115,7 @@ class SqlAlchemyUserRepository:
                 "kyc_tier": user.kyc_tier,
                 "fail_count": user.failed_totp_attempts,
                 "locked_until": user.locked_until,
+                "login_fail": user.login_failure_count,
                 "expected_version": user.version - 1,  # caller bumped it on the entity
             },
         )
