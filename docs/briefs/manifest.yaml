@@ -3,9 +3,9 @@ phase_state: in_progress
 counts:
   total: 67
   by_state:
-    in_progress: 1
     merged: 11
     ready: 55
+    review: 1
   by_phase:
     1: 18
     2: 17
@@ -275,7 +275,7 @@ briefs:
   title: API client, TanStack Query setup, error boundary
   complexity: S
   sdd_mode: lightweight
-  state: in_progress
+  state: review
   depends_on:
   - phase1-web-001
   - phase1-identity-005

@@ -13,7 +13,7 @@ estimated_hours: 4
 id: phase1-web-002
 phase: 1
 sdd_mode: lightweight
-state: in_progress
+state: review
 title: API client, TanStack Query setup, error boundary
 touches_adrs: []
 ---

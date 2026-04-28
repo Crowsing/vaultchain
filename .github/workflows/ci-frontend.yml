@@ -31,6 +31,8 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: Check shared-types are fresh from docs/api-contract.yaml
+        run: node scripts/check_shared_types_fresh.mjs
       - run: pnpm --filter @vaultchain/web run lint
       - run: pnpm --filter @vaultchain/admin run lint
       - run: pnpm --filter @vaultchain/web run typecheck
