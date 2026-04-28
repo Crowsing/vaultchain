@@ -27,6 +27,38 @@
 - **Suggested user action:** n/a
 - **Related details fields:** _(none documented)_
 
+## `concurrency.stale_aggregate`
+
+- **HTTP status:** 409 Conflict
+- **Meaning:** Optimistic-lock collision: aggregate version moved between read and write.
+- **When emitted:** Per subclass-specific raise sites; see source.
+- **Suggested user action:** n/a
+- **Related details fields:** _(none documented)_
+
+## `identity.invalid_state_transition`
+
+- **HTTP status:** 409 Conflict
+- **Meaning:** Aggregate state-machine transition is not allowed from current state.
+- **When emitted:** Per subclass-specific raise sites; see source.
+- **Suggested user action:** n/a
+- **Related details fields:** _(none documented)_
+
+## `identity.magic_link_already_used`
+
+- **HTTP status:** 409 Conflict
+- **Meaning:** Magic link's `consumed_at` is already set.
+- **When emitted:** Per subclass-specific raise sites; see source.
+- **Suggested user action:** n/a
+- **Related details fields:** _(none documented)_
+
+## `identity.magic_link_expired`
+
+- **HTTP status:** 410 Gone
+- **Meaning:** Magic link's `expires_at` is in the past.
+- **When emitted:** Per subclass-specific raise sites; see source.
+- **Suggested user action:** n/a
+- **Related details fields:** _(none documented)_
+
 ## `validation.invalid_input`
 
 - **HTTP status:** 400 Bad Request
