@@ -12,7 +12,7 @@ estimated_hours: 4
 id: phase1-identity-003
 phase: 1
 sdd_mode: strict
-state: in_progress
+state: merged
 title: TOTP enrollment + verification use cases
 touches_adrs: []
 ---
