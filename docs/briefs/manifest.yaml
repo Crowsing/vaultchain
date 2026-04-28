@@ -3,7 +3,7 @@ phase_state: in_progress
 counts:
   total: 67
   by_state:
-    blocked: 1
+    in_progress: 1
     merged: 12
     ready: 54
   by_phase:
@@ -52,7 +52,7 @@ briefs:
   title: Admin auth (password + TOTP) + session
   complexity: M
   sdd_mode: strict
-  state: blocked
+  state: in_progress
   depends_on:
   - phase1-identity-001
   - phase1-identity-003

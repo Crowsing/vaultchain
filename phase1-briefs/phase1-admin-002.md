@@ -14,7 +14,7 @@ estimated_hours: 4
 id: phase1-admin-002
 phase: 1
 sdd_mode: strict
-state: blocked
+state: in_progress
 title: Admin auth (password + TOTP) + session
 touches_adrs: []
 ---
