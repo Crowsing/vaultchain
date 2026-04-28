@@ -4,748 +4,748 @@
  */
 
 export interface paths {
-  "/api/v1/auth/logout": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/auth/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Revoke the current session
+         * @description Revoke the current session and clear cookies.
+         */
+        post: operations["auth_logout_api_v1_auth_logout_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    /**
-     * Revoke the current session
-     * @description Revoke the current session and clear cookies.
-     */
-    post: operations["auth_logout_api_v1_auth_logout_post"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/auth/refresh": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/auth/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Rotate session cookies
+         * @description Rotate the refresh-token + access-token + CSRF cookies.
+         */
+        post: operations["auth_refresh_api_v1_auth_refresh_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    /**
-     * Rotate session cookies
-     * @description Rotate the refresh-token + access-token + CSRF cookies.
-     */
-    post: operations["auth_refresh_api_v1_auth_refresh_post"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/auth/request": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/auth/request": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Issue a magic link
+         * @description Request a magic link for the supplied email / mode.
+         *
+         *     Idempotent on email — calling twice creates two distinct magic
+         *     links; both stay valid until consumed/expired. The HTTP idempotency
+         *     middleware (``Idempotency-Key`` header) collapses verbatim retries
+         *     into a single response.
+         */
+        post: operations["auth_request_api_v1_auth_request_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    /**
-     * Issue a magic link
-     * @description Request a magic link for the supplied email / mode.
-     *
-     *     Idempotent on email — calling twice creates two distinct magic
-     *     links; both stay valid until consumed/expired. The HTTP idempotency
-     *     middleware (``Idempotency-Key`` header) collapses verbatim retries
-     *     into a single response.
-     */
-    post: operations["auth_request_api_v1_auth_request_post"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/auth/totp/backup-codes/regenerate": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/auth/totp/backup-codes/regenerate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Regenerate the user's backup codes (replaces all 10)
+         * @description Recent-TOTP gating — V1 simply requires the session cookie; the
+         *     'recent TOTP' nuance is a Phase 4 polish item per Risk/Friction in
+         *     the brief. Phase 3 may layer in a step-up.
+         */
+        post: operations["regenerate_backup_codes_api_v1_auth_totp_backup_codes_regenerate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    /**
-     * Regenerate the user's backup codes (replaces all 10)
-     * @description Recent-TOTP gating — V1 simply requires the session cookie; the
-     *     'recent TOTP' nuance is a Phase 4 polish item per Risk/Friction in
-     *     the brief. Phase 3 may layer in a step-up.
-     */
-    post: operations["regenerate_backup_codes_api_v1_auth_totp_backup_codes_regenerate_post"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/auth/totp/enroll": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/auth/totp/enroll": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Generate a fresh TOTP secret + 10 backup codes (one-shot)
+         * @description Returns the secret/QR/backup codes exactly once. Bearer token is
+         *     NOT consumed yet — the client also calls ``/enroll/confirm`` with
+         *     the same token to actually mint the session.
+         */
+        post: operations["totp_enroll_api_v1_auth_totp_enroll_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    /**
-     * Generate a fresh TOTP secret + 10 backup codes (one-shot)
-     * @description Returns the secret/QR/backup codes exactly once. Bearer token is
-     *     NOT consumed yet — the client also calls ``/enroll/confirm`` with
-     *     the same token to actually mint the session.
-     */
-    post: operations["totp_enroll_api_v1_auth_totp_enroll_post"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/auth/totp/enroll/confirm": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/auth/totp/enroll/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Confirm enrollment with a code and mint a session
+         * @description Verify the freshly-typed code; on success mint a session and set
+         *     cookies. The pre-TOTP token is evicted so a replay can't mint a
+         *     second session.
+         */
+        post: operations["totp_enroll_confirm_api_v1_auth_totp_enroll_confirm_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    /**
-     * Confirm enrollment with a code and mint a session
-     * @description Verify the freshly-typed code; on success mint a session and set
-     *     cookies. The pre-TOTP token is evicted so a replay can't mint a
-     *     second session.
-     */
-    post: operations["totp_enroll_confirm_api_v1_auth_totp_enroll_confirm_post"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/auth/totp/verify": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/auth/totp/verify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Verify a TOTP / backup code on the login flow
+         * @description On success mint a session + cookies; on miss return ``success=false``
+         *     with ``attempts_remaining``; on lockout the use case raises
+         *     ``UserLocked`` which the error envelope renders 403.
+         */
+        post: operations["totp_verify_api_v1_auth_totp_verify_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    /**
-     * Verify a TOTP / backup code on the login flow
-     * @description On success mint a session + cookies; on miss return ``success=false``
-     *     with ``attempts_remaining``; on lockout the use case raises
-     *     ``UserLocked`` which the error envelope renders 403.
-     */
-    post: operations["totp_verify_api_v1_auth_totp_verify_post"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/auth/verify": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/auth/verify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Consume a magic link and mint a pre-TOTP token
+         * @description Consume the raw magic-link token; on success mint a 5-min Redis-cached
+         *     pre-TOTP bearer token that gates the TOTP routes.
+         */
+        post: operations["auth_verify_api_v1_auth_verify_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    /**
-     * Consume a magic link and mint a pre-TOTP token
-     * @description Consume the raw magic-link token; on success mint a 5-min Redis-cached
-     *     pre-TOTP bearer token that gates the TOTP routes.
-     */
-    post: operations["auth_verify_api_v1_auth_verify_post"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/me": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Return the authenticated user's profile
+         * @description The simplest authenticated route — proves the cookie + cache
+         *     pipeline works end-to-end.
+         */
+        get: operations["me_api_v1_me_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /**
-     * Return the authenticated user's profile
-     * @description The simplest authenticated route — proves the cookie + cache
-     *     pipeline works end-to-end.
-     */
-    get: operations["me_api_v1_me_get"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/healthz": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/healthz": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Healthz */
+        get: operations["healthz_healthz_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    /** Healthz */
-    get: operations["healthz_healthz_get"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-  schemas: {
-    /** AuthRequestBody */
-    AuthRequestBody: {
-      /**
-       * Email
-       * @example alice@example.com
-       */
-      email: string;
-      /** @example signup */
-      mode: components["schemas"]["MagicLinkMode"];
+    schemas: {
+        /** AuthRequestBody */
+        AuthRequestBody: {
+            /**
+             * Email
+             * @example alice@example.com
+             */
+            email: string;
+            /** @example signup */
+            mode: components["schemas"]["MagicLinkMode"];
+        };
+        /**
+         * AuthRequestResponse
+         * @example {
+         *       "message_sent": true
+         *     }
+         */
+        AuthRequestResponse: {
+            /**
+             * Message Sent
+             * @example true
+             */
+            message_sent: boolean;
+        };
+        /** AuthVerifyBody */
+        AuthVerifyBody: {
+            /** @example signup */
+            mode: components["schemas"]["MagicLinkMode"];
+            /**
+             * Token
+             * @example ml-tok-abcdef0123456789
+             */
+            token: string;
+        };
+        /**
+         * AuthVerifyResponse
+         * @example {
+         *       "email": "alice@example.com",
+         *       "is_first_time": true,
+         *       "pre_totp_token": "pre-totp-abcdef0123456789",
+         *       "requires_totp_challenge": false,
+         *       "requires_totp_enrollment": true,
+         *       "user_id": "11111111-1111-1111-1111-111111111111"
+         *     }
+         */
+        AuthVerifyResponse: {
+            /**
+             * Email
+             * @example alice@example.com
+             */
+            email: string;
+            /**
+             * Is First Time
+             * @example true
+             */
+            is_first_time: boolean;
+            /**
+             * Pre Totp Token
+             * @example pre-totp-abcdef0123456789
+             */
+            pre_totp_token: string;
+            /**
+             * Requires Totp Challenge
+             * @example false
+             */
+            requires_totp_challenge: boolean;
+            /**
+             * Requires Totp Enrollment
+             * @example true
+             */
+            requires_totp_enrollment: boolean;
+            /**
+             * User Id
+             * Format: uuid
+             * @example 11111111-1111-1111-1111-111111111111
+             */
+            user_id: string;
+        };
+        /**
+         * BackupCodesRegenerateResponse
+         * @example {
+         *       "backup_codes": [
+         *         "AAAA-BBBB-CCCC",
+         *         "DDDD-EEEE-FFFF",
+         *         "GGGG-HHHH-IIII",
+         *         "JJJJ-KKKK-LLLL",
+         *         "MMMM-NNNN-OOOO",
+         *         "PPPP-QQQQ-RRRR",
+         *         "SSSS-TTTT-UUUU",
+         *         "VVVV-WWWW-XXXX",
+         *         "YYYY-ZZZZ-AAAA",
+         *         "BBBB-CCCC-DDDD"
+         *       ]
+         *     }
+         */
+        BackupCodesRegenerateResponse: {
+            /**
+             * Backup Codes
+             * @example [
+             *       "AAAA-BBBB-CCCC",
+             *       "DDDD-EEEE-FFFF"
+             *     ]
+             */
+            backup_codes: string[];
+        };
+        /** HTTPValidationError */
+        HTTPValidationError: {
+            /** Detail */
+            detail?: components["schemas"]["ValidationError"][];
+        };
+        /**
+         * MagicLinkMode
+         * @description Magic-link request kind. Same string values the brief calls out
+         *     so wire-format and tests stay readable.
+         * @enum {string}
+         */
+        MagicLinkMode: "signup" | "login";
+        /**
+         * MeResponse
+         * @example {
+         *       "created_at": "2026-04-28T09:00:00+00:00",
+         *       "email": "alice@example.com",
+         *       "id": "11111111-1111-1111-1111-111111111111",
+         *       "kyc_tier": 0,
+         *       "status": "verified",
+         *       "totp_enrolled": true
+         *     }
+         */
+        MeResponse: {
+            /**
+             * Created At
+             * Format: date-time
+             * @example 2026-04-28T09:00:00+00:00
+             */
+            created_at: string;
+            /**
+             * Email
+             * @example alice@example.com
+             */
+            email: string;
+            /**
+             * Id
+             * Format: uuid
+             * @example 11111111-1111-1111-1111-111111111111
+             */
+            id: string;
+            /**
+             * Kyc Tier
+             * @example 0
+             */
+            kyc_tier: number;
+            /**
+             * Status
+             * @example verified
+             */
+            status: string;
+            /**
+             * Totp Enrolled
+             * @example true
+             */
+            totp_enrolled: boolean;
+        };
+        /** TotpEnrollConfirmBody */
+        TotpEnrollConfirmBody: {
+            /**
+             * Code
+             * @example 123456
+             */
+            code: string;
+        };
+        /**
+         * TotpEnrollResponse
+         * @example {
+         *       "backup_codes": [
+         *         "AAAA-BBBB-CCCC",
+         *         "DDDD-EEEE-FFFF",
+         *         "GGGG-HHHH-IIII",
+         *         "JJJJ-KKKK-LLLL",
+         *         "MMMM-NNNN-OOOO",
+         *         "PPPP-QQQQ-RRRR",
+         *         "SSSS-TTTT-UUUU",
+         *         "VVVV-WWWW-XXXX",
+         *         "YYYY-ZZZZ-AAAA",
+         *         "BBBB-CCCC-DDDD"
+         *       ],
+         *       "qr_payload_uri": "otpauth://totp/VaultChain:alice%40example.com?secret=JBSWY3DPEHPK3PXP&issuer=VaultChain",
+         *       "secret_for_qr": "JBSWY3DPEHPK3PXP"
+         *     }
+         */
+        TotpEnrollResponse: {
+            /**
+             * Backup Codes
+             * @example [
+             *       "AAAA-BBBB-CCCC",
+             *       "DDDD-EEEE-FFFF"
+             *     ]
+             */
+            backup_codes: string[];
+            /**
+             * Qr Payload Uri
+             * @example otpauth://totp/VaultChain:alice%40example.com?secret=JBSWY3DPEHPK3PXP&issuer=VaultChain
+             */
+            qr_payload_uri: string;
+            /**
+             * Secret For Qr
+             * @example JBSWY3DPEHPK3PXP
+             */
+            secret_for_qr: string;
+        };
+        /** TotpVerifyBody */
+        TotpVerifyBody: {
+            /**
+             * Code
+             * @example 123456
+             */
+            code: string;
+            /**
+             * Use Backup Code
+             * @default false
+             * @example false
+             */
+            use_backup_code: boolean;
+        };
+        /**
+         * TotpVerifyResponse
+         * @description Returned both on success and on a wrong-code path. The 403 lockout
+         *     case is signalled via the error envelope, not this body.
+         * @example {
+         *       "success": true
+         *     }
+         */
+        TotpVerifyResponse: {
+            /**
+             * Attempts Remaining
+             * @example null
+             */
+            attempts_remaining?: number | null;
+            /**
+             * Success
+             * @example true
+             */
+            success: boolean;
+        };
+        /** ValidationError */
+        ValidationError: {
+            /** Location */
+            loc: (string | number)[];
+            /** Message */
+            msg: string;
+            /** Error Type */
+            type: string;
+        };
     };
-    /**
-     * AuthRequestResponse
-     * @example {
-     *       "message_sent": true
-     *     }
-     */
-    AuthRequestResponse: {
-      /**
-       * Message Sent
-       * @example true
-       */
-      message_sent: boolean;
+    responses: never;
+    parameters: {
+        /** @description Opaque client-generated key (≤200 chars). Replays return the cached response; mismatched bodies on the same key return 422. */
+        IdempotencyKey: string;
     };
-    /** AuthVerifyBody */
-    AuthVerifyBody: {
-      /** @example signup */
-      mode: components["schemas"]["MagicLinkMode"];
-      /**
-       * Token
-       * @example ml-tok-abcdef0123456789
-       */
-      token: string;
-    };
-    /**
-     * AuthVerifyResponse
-     * @example {
-     *       "email": "alice@example.com",
-     *       "is_first_time": true,
-     *       "pre_totp_token": "pre-totp-abcdef0123456789",
-     *       "requires_totp_challenge": false,
-     *       "requires_totp_enrollment": true,
-     *       "user_id": "11111111-1111-1111-1111-111111111111"
-     *     }
-     */
-    AuthVerifyResponse: {
-      /**
-       * Email
-       * @example alice@example.com
-       */
-      email: string;
-      /**
-       * Is First Time
-       * @example true
-       */
-      is_first_time: boolean;
-      /**
-       * Pre Totp Token
-       * @example pre-totp-abcdef0123456789
-       */
-      pre_totp_token: string;
-      /**
-       * Requires Totp Challenge
-       * @example false
-       */
-      requires_totp_challenge: boolean;
-      /**
-       * Requires Totp Enrollment
-       * @example true
-       */
-      requires_totp_enrollment: boolean;
-      /**
-       * User Id
-       * Format: uuid
-       * @example 11111111-1111-1111-1111-111111111111
-       */
-      user_id: string;
-    };
-    /**
-     * BackupCodesRegenerateResponse
-     * @example {
-     *       "backup_codes": [
-     *         "AAAA-BBBB-CCCC",
-     *         "DDDD-EEEE-FFFF",
-     *         "GGGG-HHHH-IIII",
-     *         "JJJJ-KKKK-LLLL",
-     *         "MMMM-NNNN-OOOO",
-     *         "PPPP-QQQQ-RRRR",
-     *         "SSSS-TTTT-UUUU",
-     *         "VVVV-WWWW-XXXX",
-     *         "YYYY-ZZZZ-AAAA",
-     *         "BBBB-CCCC-DDDD"
-     *       ]
-     *     }
-     */
-    BackupCodesRegenerateResponse: {
-      /**
-       * Backup Codes
-       * @example [
-       *       "AAAA-BBBB-CCCC",
-       *       "DDDD-EEEE-FFFF"
-       *     ]
-       */
-      backup_codes: string[];
-    };
-    /** HTTPValidationError */
-    HTTPValidationError: {
-      /** Detail */
-      detail?: components["schemas"]["ValidationError"][];
-    };
-    /**
-     * MagicLinkMode
-     * @description Magic-link request kind. Same string values the brief calls out
-     *     so wire-format and tests stay readable.
-     * @enum {string}
-     */
-    MagicLinkMode: "signup" | "login";
-    /**
-     * MeResponse
-     * @example {
-     *       "created_at": "2026-04-28T09:00:00+00:00",
-     *       "email": "alice@example.com",
-     *       "id": "11111111-1111-1111-1111-111111111111",
-     *       "kyc_tier": 0,
-     *       "status": "verified",
-     *       "totp_enrolled": true
-     *     }
-     */
-    MeResponse: {
-      /**
-       * Created At
-       * Format: date-time
-       * @example 2026-04-28T09:00:00+00:00
-       */
-      created_at: string;
-      /**
-       * Email
-       * @example alice@example.com
-       */
-      email: string;
-      /**
-       * Id
-       * Format: uuid
-       * @example 11111111-1111-1111-1111-111111111111
-       */
-      id: string;
-      /**
-       * Kyc Tier
-       * @example 0
-       */
-      kyc_tier: number;
-      /**
-       * Status
-       * @example verified
-       */
-      status: string;
-      /**
-       * Totp Enrolled
-       * @example true
-       */
-      totp_enrolled: boolean;
-    };
-    /** TotpEnrollConfirmBody */
-    TotpEnrollConfirmBody: {
-      /**
-       * Code
-       * @example 123456
-       */
-      code: string;
-    };
-    /**
-     * TotpEnrollResponse
-     * @example {
-     *       "backup_codes": [
-     *         "AAAA-BBBB-CCCC",
-     *         "DDDD-EEEE-FFFF",
-     *         "GGGG-HHHH-IIII",
-     *         "JJJJ-KKKK-LLLL",
-     *         "MMMM-NNNN-OOOO",
-     *         "PPPP-QQQQ-RRRR",
-     *         "SSSS-TTTT-UUUU",
-     *         "VVVV-WWWW-XXXX",
-     *         "YYYY-ZZZZ-AAAA",
-     *         "BBBB-CCCC-DDDD"
-     *       ],
-     *       "qr_payload_uri": "otpauth://totp/VaultChain:alice%40example.com?secret=JBSWY3DPEHPK3PXP&issuer=VaultChain",
-     *       "secret_for_qr": "JBSWY3DPEHPK3PXP"
-     *     }
-     */
-    TotpEnrollResponse: {
-      /**
-       * Backup Codes
-       * @example [
-       *       "AAAA-BBBB-CCCC",
-       *       "DDDD-EEEE-FFFF"
-       *     ]
-       */
-      backup_codes: string[];
-      /**
-       * Qr Payload Uri
-       * @example otpauth://totp/VaultChain:alice%40example.com?secret=JBSWY3DPEHPK3PXP&issuer=VaultChain
-       */
-      qr_payload_uri: string;
-      /**
-       * Secret For Qr
-       * @example JBSWY3DPEHPK3PXP
-       */
-      secret_for_qr: string;
-    };
-    /** TotpVerifyBody */
-    TotpVerifyBody: {
-      /**
-       * Code
-       * @example 123456
-       */
-      code: string;
-      /**
-       * Use Backup Code
-       * @default false
-       * @example false
-       */
-      use_backup_code: boolean;
-    };
-    /**
-     * TotpVerifyResponse
-     * @description Returned both on success and on a wrong-code path. The 403 lockout
-     *     case is signalled via the error envelope, not this body.
-     * @example {
-     *       "success": true
-     *     }
-     */
-    TotpVerifyResponse: {
-      /**
-       * Attempts Remaining
-       * @example null
-       */
-      attempts_remaining?: number | null;
-      /**
-       * Success
-       * @example true
-       */
-      success: boolean;
-    };
-    /** ValidationError */
-    ValidationError: {
-      /** Location */
-      loc: (string | number)[];
-      /** Message */
-      msg: string;
-      /** Error Type */
-      type: string;
-    };
-  };
-  responses: never;
-  parameters: {
-    /** @description Opaque client-generated key (≤200 chars). Replays return the cached response; mismatched bodies on the same key return 422. */
-    IdempotencyKey: string;
-  };
-  requestBodies: never;
-  headers: never;
-  pathItems: never;
+    requestBodies: never;
+    headers: never;
+    pathItems: never;
 }
 export type $defs = Record<string, never>;
 export interface operations {
-  auth_logout_api_v1_auth_logout_post: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    auth_logout_api_v1_auth_logout_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
     };
-    requestBody?: never;
-    responses: {
-      /** @description Successful Response */
-      204: {
-        headers: {
-          [name: string]: unknown;
+    auth_refresh_api_v1_auth_refresh_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                vc_rt?: string | null;
+            };
         };
-        content?: never;
-      };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
     };
-  };
-  auth_refresh_api_v1_auth_refresh_post: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: {
-        vc_rt?: string | null;
-      };
+    auth_request_api_v1_auth_request_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AuthRequestBody"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthRequestResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
     };
-    requestBody?: never;
-    responses: {
-      /** @description Successful Response */
-      204: {
-        headers: {
-          [name: string]: unknown;
+    regenerate_backup_codes_api_v1_auth_totp_backup_codes_regenerate_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-        content?: never;
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BackupCodesRegenerateResponse"];
+                };
+            };
         };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
     };
-  };
-  auth_request_api_v1_auth_request_post: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    totp_enroll_api_v1_auth_totp_enroll_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TotpEnrollResponse"];
+                };
+            };
+        };
     };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["AuthRequestBody"];
-      };
+    totp_enroll_confirm_api_v1_auth_totp_enroll_confirm_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TotpEnrollConfirmBody"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TotpVerifyResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
     };
-    responses: {
-      /** @description Successful Response */
-      202: {
-        headers: {
-          [name: string]: unknown;
+    totp_verify_api_v1_auth_totp_verify_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: never;
         };
-        content: {
-          "application/json": components["schemas"]["AuthRequestResponse"];
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TotpVerifyBody"];
+            };
         };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TotpVerifyResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
         };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
     };
-  };
-  regenerate_backup_codes_api_v1_auth_totp_backup_codes_regenerate_post: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    auth_verify_api_v1_auth_verify_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AuthVerifyBody"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthVerifyResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
     };
-    requestBody?: never;
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
+    me_api_v1_me_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-        content: {
-          "application/json": components["schemas"]["BackupCodesRegenerateResponse"];
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MeResponse"];
+                };
+            };
         };
-      };
     };
-  };
-  totp_enroll_api_v1_auth_totp_enroll_post: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    healthz_healthz_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: string;
+                    };
+                };
+            };
+        };
     };
-    requestBody?: never;
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["TotpEnrollResponse"];
-        };
-      };
-    };
-  };
-  totp_enroll_confirm_api_v1_auth_totp_enroll_confirm_post: {
-    parameters: {
-      query?: never;
-      header?: {
-        authorization?: string | null;
-      };
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["TotpEnrollConfirmBody"];
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["TotpVerifyResponse"];
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  totp_verify_api_v1_auth_totp_verify_post: {
-    parameters: {
-      query?: never;
-      header?: {
-        authorization?: string | null;
-      };
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["TotpVerifyBody"];
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["TotpVerifyResponse"];
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  auth_verify_api_v1_auth_verify_post: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["AuthVerifyBody"];
-      };
-    };
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["AuthVerifyResponse"];
-        };
-      };
-      /** @description Validation Error */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["HTTPValidationError"];
-        };
-      };
-    };
-  };
-  me_api_v1_me_get: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": components["schemas"]["MeResponse"];
-        };
-      };
-    };
-  };
-  healthz_healthz_get: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Successful Response */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/json": {
-            [key: string]: string;
-          };
-        };
-      };
-    };
-  };
 }
