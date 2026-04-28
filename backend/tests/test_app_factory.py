@@ -20,12 +20,25 @@ def test_create_app_returns_fastapi_instance() -> None:
     assert isinstance(app, FastAPI)
 
 
-def test_healthz_returns_ok() -> None:
+def test_healthz_reports_db_and_redis_check_keys() -> None:
+    """phase1-deploy-001: /healthz pings DB + Redis and reports per-dep status.
+
+    In CI / local-test conditions the DB/Redis pings may genuinely fail
+    (no live services pointed at; the test only asserts the *shape* of
+    the response, not that every dep is up). Production probes hit the
+    real services and so will return 200 with both checks green.
+    """
     app = create_app()
     with TestClient(app) as client:
         response = client.get("/healthz")
-        assert response.status_code == 200
-        assert response.json() == {"status": "ok"}
+        # Either 200 (ok) or 503 (one or both deps unreachable in test env).
+        assert response.status_code in (200, 503)
+        body = response.json()
+        assert "status" in body
+        assert body["status"] in ("ok", "degraded")
+        assert "checks" in body
+        assert "database" in body["checks"]
+        assert "redis" in body["checks"]
 
 
 def test_app_factory_idempotent() -> None:

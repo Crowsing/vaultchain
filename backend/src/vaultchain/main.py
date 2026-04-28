@@ -21,9 +21,12 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from typing import Any
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Response, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
+from redis.asyncio import Redis as AsyncRedis
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import create_async_engine
 
 from vaultchain.config import get_settings
 from vaultchain.identity.delivery.composition import (
@@ -34,6 +37,7 @@ from vaultchain.identity.delivery.routes import build_admin_router, build_identi
 from vaultchain.shared.delivery import RequestIdMiddleware, register_error_handlers
 from vaultchain.shared.delivery.idempotency import IdempotencyMiddleware
 from vaultchain.shared.infra.idempotency import RedisIdempotencyStore
+from vaultchain.shared.observability import init_sentry
 
 
 def _install_idempotency_openapi(app: FastAPI) -> None:
@@ -72,7 +76,10 @@ def _install_idempotency_openapi(app: FastAPI) -> None:
 
 def create_app() -> FastAPI:
     settings = get_settings()
+    init_sentry(dsn=settings.sentry_dsn_backend, environment=settings.environment)
     idempotency_store = RedisIdempotencyStore.from_url(settings.redis_url)
+    healthz_engine = create_async_engine(settings.database_url, pool_size=1, max_overflow=0)
+    healthz_redis = AsyncRedis.from_url(settings.redis_url)
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
@@ -81,6 +88,8 @@ def create_app() -> FastAPI:
         finally:
             await idempotency_store.aclose()
             await shutdown_identity_dependencies(app)
+            await healthz_engine.dispose()
+            await healthz_redis.aclose()
 
     app = FastAPI(
         title="VaultChain API",
@@ -108,8 +117,25 @@ def create_app() -> FastAPI:
     app.include_router(build_admin_router())
 
     @app.get("/healthz")
-    async def healthz() -> dict[str, str]:
-        return {"status": "ok"}
+    async def healthz(response: Response) -> dict[str, Any]:
+        checks: dict[str, str] = {}
+        ok = True
+        try:
+            async with healthz_engine.connect() as conn:
+                await conn.execute(text("SELECT 1"))
+            checks["database"] = "ok"
+        except Exception as exc:
+            ok = False
+            checks["database"] = f"down: {type(exc).__name__}"
+        try:
+            await healthz_redis.ping()
+            checks["redis"] = "ok"
+        except Exception as exc:
+            ok = False
+            checks["redis"] = f"down: {type(exc).__name__}"
+        if not ok:
+            response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
+        return {"status": "ok" if ok else "degraded", "checks": checks}
 
     return app
 
