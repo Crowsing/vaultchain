@@ -3,8 +3,7 @@ phase_state: in_progress
 counts:
   total: 67
   by_state:
-    in_progress: 1
-    merged: 8
+    merged: 9
     ready: 58
   by_phase:
     1: 18
@@ -156,7 +155,7 @@ briefs:
   title: Session management — cookies, CSRF, refresh-token rotation
   complexity: M
   sdd_mode: strict
-  state: in_progress
+  state: merged
   depends_on:
   - phase1-identity-001
   - phase1-shared-003

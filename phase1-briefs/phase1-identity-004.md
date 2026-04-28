@@ -12,7 +12,7 @@ estimated_hours: 4
 id: phase1-identity-004
 phase: 1
 sdd_mode: strict
-state: in_progress
+state: merged
 title: Session management — cookies, CSRF, refresh-token rotation
 touches_adrs:
 - ADR-002
