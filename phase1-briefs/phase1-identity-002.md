@@ -11,7 +11,7 @@ estimated_hours: 4
 id: phase1-identity-002
 phase: 1
 sdd_mode: strict
-state: in_progress
+state: merged
 title: Magic-link signup/login flow + email port + console adapter
 touches_adrs: []
 ---

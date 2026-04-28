@@ -3,8 +3,7 @@ phase_state: in_progress
 counts:
   total: 67
   by_state:
-    in_progress: 1
-    merged: 9
+    merged: 10
     ready: 57
   by_phase:
     1: 18
@@ -123,7 +122,7 @@ briefs:
   title: Magic-link signup/login flow + email port + console adapter
   complexity: L
   sdd_mode: strict
-  state: in_progress
+  state: merged
   depends_on:
   - phase1-identity-001
   - phase1-shared-003
