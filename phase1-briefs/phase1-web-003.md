@@ -1,5 +1,5 @@
 ---
-ac_count: 1
+ac_count: 9
 blocks:
 - phase1-deploy-001
 complexity: L
@@ -11,7 +11,7 @@ estimated_hours: 4
 id: phase1-web-003
 phase: 1
 sdd_mode: lightweight
-state: in_progress
+state: review
 title: Auth screens (signup, magic-link sent, login, TOTP enrollment)
 touches_adrs: []
 ---

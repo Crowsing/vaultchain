@@ -1,9 +1,9 @@
 /**
  * Top-level router config. Splits the route tree into two groups:
  *
- *   - Pre-auth (`/auth/*`): renders bare, no shell. Real screens come
- *     from `phase1-web-003` — for now we keep small placeholders so
- *     `bootstrapSession`'s redirect destinations resolve.
+ *   - Pre-auth (`/`, `/auth/*`): renders bare with the AuthLayout
+ *     pre-auth shell. The post-auth shell is intentionally a separate
+ *     component tree.
  *   - Authed: rendered inside the AppShell, gated by SessionGate.
  *     The 404 catch-all also lives here so authed users get the shell
  *     wrapped error.
@@ -19,36 +19,29 @@ import {
 import { AppShell } from "@/components/shell/AppShell";
 import { SessionGate } from "@/components/SessionGate";
 import { DashboardRoute } from "@/routes/dashboard";
+import { LandingRoute } from "@/routes/landing";
 import { NotFoundRoute } from "@/routes/not-found";
 import { PlaceholderRoute } from "@/routes/placeholder";
+import { EnrollRoute } from "@/routes/auth/enroll";
+import { LoginRoute } from "@/routes/auth/login";
+import { SentRoute } from "@/routes/auth/sent";
+import { SignupRoute } from "@/routes/auth/signup";
+import { TotpRoute } from "@/routes/auth/totp";
+import { VerifyRoute } from "@/routes/auth/verify";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route>
-      <Route
-        path="/auth/login"
-        element={
-          <PlaceholderRoute
-            testId="auth-login-placeholder"
-            title="Sign in"
-            description="Login screen lands in phase1-web-003."
-          />
-        }
-      />
-      <Route
-        path="/auth/totp"
-        element={
-          <PlaceholderRoute
-            testId="auth-totp-placeholder"
-            title="Two-factor"
-            description="TOTP screen lands in phase1-web-003."
-          />
-        }
-      />
+      <Route path="/" element={<LandingRoute />} />
+      <Route path="/auth/signup" element={<SignupRoute />} />
+      <Route path="/auth/login" element={<LoginRoute />} />
+      <Route path="/auth/sent" element={<SentRoute />} />
+      <Route path="/auth/verify" element={<VerifyRoute />} />
+      <Route path="/auth/enroll" element={<EnrollRoute />} />
+      <Route path="/auth/totp" element={<TotpRoute />} />
 
       <Route element={<SessionGate />}>
         <Route element={<AppShell />}>
-          <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<DashboardRoute />} />
           <Route
             path="send"
@@ -123,6 +116,7 @@ const router = createBrowserRouter(
           <Route path="*" element={<NotFoundRoute />} />
         </Route>
       </Route>
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Route>,
   ),
 );
