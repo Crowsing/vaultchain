@@ -3,9 +3,10 @@ phase_state: in_progress
 counts:
   total: 69
   by_state:
+    in_progress: 1
     merged: 15
     obsolete: 1
-    ready: 53
+    ready: 52
   by_phase:
     1: 20
     2: 17
@@ -66,7 +67,7 @@ briefs:
   title: Admin auth backend (password+TOTP, session, seed CLI)
   complexity: M
   sdd_mode: strict
-  state: ready
+  state: in_progress
   depends_on:
   - phase1-identity-001
   - phase1-identity-003
