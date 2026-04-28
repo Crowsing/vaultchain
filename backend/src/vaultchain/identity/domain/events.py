@@ -12,10 +12,12 @@ from datetime import datetime
 from typing import ClassVar
 from uuid import UUID
 
+from vaultchain.identity.domain.aggregates import MagicLinkMode
 from vaultchain.shared.events.base import DomainEvent
 from vaultchain.shared.events.registry import register_event
 
 
+@register_event
 @dataclass(frozen=True, kw_only=True)
 class UserSignedUp(DomainEvent):
     email: str
@@ -30,20 +32,34 @@ class UserLocked(DomainEvent):
     event_type: ClassVar[str] = "identity.user_locked"
 
 
+@register_event
 @dataclass(frozen=True, kw_only=True)
 class MagicLinkRequested(DomainEvent):
     user_id: UUID
-    mode: str
+    mode: MagicLinkMode
     aggregate_type: ClassVar[str] = "magic_link"
     event_type: ClassVar[str] = "identity.magic_link_requested"
 
+    def __post_init__(self) -> None:
+        # Outbox round-trip rebuilds the event from `payload` JSON, where
+        # `mode` is a plain string. Coerce so consumers can rely on the
+        # StrEnum identity (`==` still works either way thanks to str
+        # subclassing, but `isinstance(..., MagicLinkMode)` would not).
+        if not isinstance(self.mode, MagicLinkMode):
+            object.__setattr__(self, "mode", MagicLinkMode(self.mode))
 
+
+@register_event
 @dataclass(frozen=True, kw_only=True)
 class MagicLinkConsumed(DomainEvent):
     user_id: UUID
-    mode: str
+    mode: MagicLinkMode
     aggregate_type: ClassVar[str] = "magic_link"
     event_type: ClassVar[str] = "identity.magic_link_consumed"
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.mode, MagicLinkMode):
+            object.__setattr__(self, "mode", MagicLinkMode(self.mode))
 
 
 @register_event

@@ -36,6 +36,10 @@ class Settings(BaseSettings):
     smtp_port: int = 1025
     email_from: str = "noreply@vaultchain.example"
     resend_api_key: SecretStr | None = None
+    #: Public origin of the user-facing app. Magic-link URLs interpolate
+    #: this — see AC-phase1-identity-002-10. Production sets it to e.g.
+    #: ``https://app.vaultchain.io``; CI defaults remain http://localhost.
+    frontend_url: str = "http://localhost:5173"
 
     # ------------- KMS / phase 2 -------------
     aws_region: str = "us-east-1"

@@ -53,16 +53,24 @@
 
 ## `identity.magic_link_already_used`
 
-- **HTTP status:** 409 Conflict
-- **Meaning:** Magic link's `consumed_at` is already set.
+- **HTTP status:** 401 Unauthorized
+- **Meaning:** Magic link's `consumed_at` is already set; AC-phase1-identity-002-07.
 - **When emitted:** Per subclass-specific raise sites; see source.
 - **Suggested user action:** n/a
 - **Related details fields:** _(none documented)_
 
 ## `identity.magic_link_expired`
 
-- **HTTP status:** 410 Gone
-- **Meaning:** Magic link's `expires_at` is in the past.
+- **HTTP status:** 401 Unauthorized
+- **Meaning:** Magic link's `expires_at` is in the past; AC-phase1-identity-002-08.
+- **When emitted:** Per subclass-specific raise sites; see source.
+- **Suggested user action:** n/a
+- **Related details fields:** _(none documented)_
+
+## `identity.magic_link_invalid`
+
+- **HTTP status:** 401 Unauthorized
+- **Meaning:** Token hash matches no row; AC-phase1-identity-002-06.
 - **When emitted:** Per subclass-specific raise sites; see source.
 - **Suggested user action:** n/a
 - **Related details fields:** _(none documented)_

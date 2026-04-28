@@ -23,19 +23,32 @@ class InvalidStateTransition(ConflictError):
     default_message: ClassVar[str] = "Invalid state transition for this aggregate."
 
 
+class MagicLinkInvalid(DomainError):
+    """Token hash matches no row; AC-phase1-identity-002-06."""
+
+    code: ClassVar[str] = "identity.magic_link_invalid"
+    status_code: ClassVar[int] = HTTPStatus.UNAUTHORIZED
+    default_message: ClassVar[str] = "Magic link is invalid."
+
+
 class MagicLinkExpired(DomainError):
-    """Magic link's `expires_at` is in the past."""
+    """Magic link's `expires_at` is in the past; AC-phase1-identity-002-08.
+
+    Status is 401 (not 410): per the brief, expired / unknown / already
+    used all map to 401 so that response distinguishability does not
+    leak whether a particular token ever existed.
+    """
 
     code: ClassVar[str] = "identity.magic_link_expired"
-    status_code: ClassVar[int] = HTTPStatus.GONE
+    status_code: ClassVar[int] = HTTPStatus.UNAUTHORIZED
     default_message: ClassVar[str] = "Magic link has expired."
 
 
 class MagicLinkAlreadyUsed(DomainError):
-    """Magic link's `consumed_at` is already set."""
+    """Magic link's `consumed_at` is already set; AC-phase1-identity-002-07."""
 
     code: ClassVar[str] = "identity.magic_link_already_used"
-    status_code: ClassVar[int] = HTTPStatus.CONFLICT
+    status_code: ClassVar[int] = HTTPStatus.UNAUTHORIZED
     default_message: ClassVar[str] = "Magic link has already been used."
 
 
@@ -96,6 +109,7 @@ __all__ = [
     "InvalidStateTransition",
     "MagicLinkAlreadyUsed",
     "MagicLinkExpired",
+    "MagicLinkInvalid",
     "RefreshTokenInvalid",
     "TotpAlreadyEnrolled",
     "TotpNotEnrolled",

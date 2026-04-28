@@ -10,8 +10,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
-from enum import Enum
-from typing import TYPE_CHECKING, Final, Literal
+from enum import StrEnum
+from typing import TYPE_CHECKING, Final
 from uuid import UUID, uuid4
 
 from vaultchain.identity.domain.errors import (
@@ -29,13 +29,20 @@ def _utc_now() -> datetime:
     return datetime.now(UTC)
 
 
-class UserStatus(str, Enum):
+class UserStatus(StrEnum):
     UNVERIFIED = "unverified"
     VERIFIED = "verified"
     LOCKED = "locked"
 
 
-MagicLinkMode = Literal["signup", "login"]
+class MagicLinkMode(StrEnum):
+    """Magic-link request kind. Same string values the brief calls out
+    so wire-format and tests stay readable.
+    """
+
+    SIGNUP = "signup"
+    LOGIN = "login"
+
 
 #: Wrong TOTP attempts permitted before the lockout transition fires.
 TOTP_LOCKOUT_THRESHOLD: Final[int] = 5

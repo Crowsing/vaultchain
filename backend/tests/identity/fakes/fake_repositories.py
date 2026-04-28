@@ -1,4 +1,5 @@
-"""In-memory `UserRepository`, `TotpSecretRepository`, and `SessionRepository` fakes.
+"""In-memory `UserRepository`, `TotpSecretRepository`, `MagicLinkRepository`,
+and `SessionRepository` fakes.
 
 Tests instantiate one repo per test, populate it with seed data, and
 inject it via a factory that ignores the session (the factory shape
@@ -12,6 +13,7 @@ from datetime import UTC, datetime
 from uuid import UUID
 
 from vaultchain.identity.domain.aggregates import (
+    MagicLink,
     Session,
     TotpSecret,
     User,
@@ -103,3 +105,25 @@ class InMemorySessionRepository:
         if existing.version != sess.version - 1:
             raise StaleAggregate(details={"aggregate_id": str(sess.id), "kind": "session"})
         self._by_id[sess.id] = copy.deepcopy(sess)
+
+
+class InMemoryMagicLinkRepository:
+    def __init__(self) -> None:
+        self._by_id: dict[UUID, MagicLink] = {}
+
+    def seed(self, link: MagicLink) -> None:
+        self._by_id[link.id] = copy.deepcopy(link)
+
+    async def add(self, link: MagicLink) -> None:
+        self._by_id[link.id] = copy.deepcopy(link)
+
+    async def get_by_token_hash(self, token_hash: bytes) -> MagicLink | None:
+        for link in self._by_id.values():
+            if link.token_hash == token_hash:
+                return copy.deepcopy(link)
+        return None
+
+    async def update(self, link: MagicLink) -> None:
+        if link.id not in self._by_id:
+            raise StaleAggregate(details={"aggregate_id": str(link.id), "kind": "magic_link"})
+        self._by_id[link.id] = copy.deepcopy(link)
