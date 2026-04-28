@@ -17,7 +17,7 @@ estimated_hours: 4
 id: phase1-identity-005
 phase: 1
 sdd_mode: strict
-state: in_progress
+state: merged
 title: Auth API endpoints + OpenAPI
 touches_adrs:
 - ADR-002
