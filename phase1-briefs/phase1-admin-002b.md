@@ -11,7 +11,7 @@ estimated_hours: 3
 id: phase1-admin-002b
 phase: 1
 sdd_mode: lightweight
-state: in_progress
+state: merged
 title: Admin auth frontend (login + TOTP routes)
 touches_adrs: []
 ---

@@ -3,8 +3,7 @@ phase_state: in_progress
 counts:
   total: 69
   by_state:
-    in_progress: 1
-    merged: 16
+    merged: 17
     obsolete: 1
     ready: 51
   by_phase:
@@ -87,7 +86,7 @@ briefs:
   title: Admin auth frontend (login + TOTP routes)
   complexity: S
   sdd_mode: lightweight
-  state: in_progress
+  state: merged
   depends_on:
   - phase1-admin-001
   - phase1-admin-002a
