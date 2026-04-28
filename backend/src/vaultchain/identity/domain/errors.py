@@ -104,15 +104,40 @@ class CsrfFailed(_SharedPermissionError):
     default_message: ClassVar[str] = "CSRF check failed."
 
 
+class TotpRequired(_SharedPermissionError):
+    """Verified user without TOTP attempted a session-protected route;
+    AC-phase1-identity-005-04. Frontend reads `is_first_time` from
+    `/auth/verify` to know it must enroll, so this is a defensive
+    last-line check that should not normally fire from a well-behaved
+    client.
+    """
+
+    code: ClassVar[str] = "identity.totp_required"
+    status_code: ClassVar[int] = HTTPStatus.FORBIDDEN
+    default_message: ClassVar[str] = "TOTP enrollment required for this route."
+
+
+class PreTotpTokenInvalid(DomainError):
+    """The bearer pre-totp token is unknown, expired, or wrong intent;
+    AC-phase1-identity-005-05.
+    """
+
+    code: ClassVar[str] = "identity.pre_totp_token_invalid"
+    status_code: ClassVar[int] = HTTPStatus.UNAUTHORIZED
+    default_message: ClassVar[str] = "Pre-TOTP token is invalid or expired."
+
+
 __all__ = [
     "CsrfFailed",
     "InvalidStateTransition",
     "MagicLinkAlreadyUsed",
     "MagicLinkExpired",
     "MagicLinkInvalid",
+    "PreTotpTokenInvalid",
     "RefreshTokenInvalid",
     "TotpAlreadyEnrolled",
     "TotpNotEnrolled",
+    "TotpRequired",
     "Unauthenticated",
     "UserLocked",
 ]

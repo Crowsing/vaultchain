@@ -26,6 +26,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
 
 from vaultchain.config import get_settings
+from vaultchain.identity.delivery.composition import (
+    install_identity_dependencies,
+    shutdown_identity_dependencies,
+)
+from vaultchain.identity.delivery.routes import build_identity_router
 from vaultchain.shared.delivery import RequestIdMiddleware, register_error_handlers
 from vaultchain.shared.delivery.idempotency import IdempotencyMiddleware
 from vaultchain.shared.infra.idempotency import RedisIdempotencyStore
@@ -75,6 +80,7 @@ def create_app() -> FastAPI:
             yield
         finally:
             await idempotency_store.aclose()
+            await shutdown_identity_dependencies(app)
 
     app = FastAPI(
         title="VaultChain API",
@@ -97,6 +103,8 @@ def create_app() -> FastAPI:
 
     register_error_handlers(app)
     _install_idempotency_openapi(app)
+    install_identity_dependencies(app, settings)
+    app.include_router(build_identity_router())
 
     @app.get("/healthz")
     async def healthz() -> dict[str, str]:

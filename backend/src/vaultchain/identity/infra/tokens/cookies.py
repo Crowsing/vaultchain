@@ -12,7 +12,7 @@ attribute so cookies actually get set; production wiring leaves it True.
 
 from __future__ import annotations
 
-from typing import Protocol
+from typing import Any, Protocol
 
 ACCESS_COOKIE_NAME = "vc_at"
 REFRESH_COOKIE_NAME = "vc_rt"
@@ -29,23 +29,15 @@ SAME_SITE_LAX = "lax"
 
 class _CookieResponse(Protocol):
     """Subset of the `Response.set_cookie` / `delete_cookie` shape that
-    FastAPI / Starlette responses expose. Typed so the helper depends on
-    a structural shape rather than the concrete `Response` class.
+    FastAPI / Starlette responses expose. Typed structurally so we work
+    with both the real `Response` and bespoke test stubs; ``Any`` keeps
+    the kwargs signature compatible with Starlette's permissive
+    `set_cookie` (most params optional with sentinel defaults).
     """
 
-    def set_cookie(
-        self,
-        key: str,
-        value: str,
-        *,
-        max_age: int,
-        path: str,
-        httponly: bool,
-        secure: bool,
-        samesite: str,
-    ) -> None: ...
+    def set_cookie(self, *args: Any, **kwargs: Any) -> None: ...
 
-    def delete_cookie(self, key: str, *, path: str) -> None: ...
+    def delete_cookie(self, *args: Any, **kwargs: Any) -> None: ...
 
 
 def set_session_cookies(
