@@ -72,6 +72,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: [build-image, build-frontend]
+    permissions:
+      contents: read
+      packages: read
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
@@ -100,6 +103,12 @@ jobs:
         run: |
           rsync -avz Caddyfile docker-compose-prod.yml scripts/deploy-server.sh \
                 deploy@${{ secrets.HETZNER_HOST }}:/opt/vaultchain/
+      - name: Login to GHCR on VM (short-lived job token)
+        run: |
+          ACTOR_LC=$(echo "${{ github.actor }}" | tr '[:upper:]' '[:lower:]')
+          echo "${{ secrets.GITHUB_TOKEN }}" \
+            | ssh deploy@${{ secrets.HETZNER_HOST }} \
+                "docker login ghcr.io -u ${ACTOR_LC} --password-stdin"
       - name: Run deploy script on VM
         run: |
           ssh deploy@${{ secrets.HETZNER_HOST }} \
