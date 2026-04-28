@@ -1,5 +1,5 @@
 ---
-ac_count: 6
+ac_count: 8
 blocks:
 - phase1-web-004
 - phase1-deploy-001
@@ -13,7 +13,7 @@ estimated_hours: 4
 id: phase1-web-005
 phase: 1
 sdd_mode: lightweight
-state: in_progress
+state: review
 title: App shell, routing, session bootstrap
 touches_adrs: []
 ---
