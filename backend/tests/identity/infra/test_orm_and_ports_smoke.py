@@ -10,8 +10,10 @@ from __future__ import annotations
 from unittest.mock import MagicMock
 
 from vaultchain.identity.domain.ports import (
+    BackupCodeService,
     MagicLinkRepository,
     SessionRepository,
+    TotpCodeChecker,
     TotpSecretEncryptor,
     TotpSecretRepository,
     UserRepository,
@@ -37,6 +39,9 @@ class TestOrmMetadata:
         assert UserRow.__table__.schema == "identity"
         assert "email" in UserRow.__table__.columns
         assert "version" in UserRow.__table__.columns
+        # phase1-identity-003 lockout columns
+        assert "failed_totp_attempts" in UserRow.__table__.columns
+        assert "locked_until" in UserRow.__table__.columns
 
     def test_sessions_row_has_fk_to_users(self) -> None:
         assert SessionRow.__tablename__ == "sessions"
@@ -81,3 +86,19 @@ class TestPortConformance:
     def test_static_key_encryptor_satisfies_totp_secret_encryptor_protocol(self) -> None:
         enc = StaticKeyTotpEncryptor.from_passphrase("p")
         assert isinstance(enc, TotpSecretEncryptor)
+
+    def test_pyotp_code_checker_satisfies_totp_code_checker_protocol(self) -> None:
+        from vaultchain.identity.infra.totp.pyotp_checker import PyOtpCodeChecker
+
+        assert isinstance(PyOtpCodeChecker(), TotpCodeChecker)
+
+    def test_argon2_backup_code_service_satisfies_backup_code_service_protocol(self) -> None:
+        from argon2 import PasswordHasher
+
+        from vaultchain.identity.infra.totp.backup_codes import Argon2BackupCodeService
+
+        # Cheap test profile so import-time doesn't add latency.
+        svc = Argon2BackupCodeService(
+            hasher=PasswordHasher(time_cost=1, memory_cost=8, parallelism=1)
+        )
+        assert isinstance(svc, BackupCodeService)

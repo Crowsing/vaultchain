@@ -59,6 +59,30 @@
 - **Suggested user action:** n/a
 - **Related details fields:** _(none documented)_
 
+## `identity.totp_already_enrolled`
+
+- **HTTP status:** 409 Conflict
+- **Meaning:** Re-enrollment is blocked; AC-phase1-identity-003-03.
+- **When emitted:** Per subclass-specific raise sites; see source.
+- **Suggested user action:** n/a
+- **Related details fields:** _(none documented)_
+
+## `identity.totp_not_enrolled`
+
+- **HTTP status:** 404 Not Found
+- **Meaning:** Verify or regenerate without prior enrollment.
+- **When emitted:** Per subclass-specific raise sites; see source.
+- **Suggested user action:** n/a
+- **Related details fields:** _(none documented)_
+
+## `identity.user_locked`
+
+- **HTTP status:** 403 Forbidden
+- **Meaning:** Verification rejected during the lockout window; AC-phase1-identity-003-06.
+- **When emitted:** Per subclass-specific raise sites; see source.
+- **Suggested user action:** n/a
+- **Related details fields:** _(none documented)_
+
 ## `validation.invalid_input`
 
 - **HTTP status:** 400 Bad Request

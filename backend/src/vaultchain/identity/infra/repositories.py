@@ -33,6 +33,8 @@ def _user_from_row(row: sa.Row[Any]) -> User:
         version=row.version,
         created_at=row.created_at,
         updated_at=row.updated_at,
+        failed_totp_attempts=row.failed_totp_attempts,
+        locked_until=row.locked_until,
     )
 
 
@@ -81,6 +83,7 @@ class SqlAlchemyUserRepository:
             sa.text(
                 "UPDATE identity.users "
                 "SET status=:status, kyc_tier=:kyc_tier, "
+                "failed_totp_attempts=:fail_count, locked_until=:locked_until, "
                 "version=version+1, updated_at=NOW() "
                 "WHERE id=:id AND version=:expected_version"
             ),
@@ -88,6 +91,8 @@ class SqlAlchemyUserRepository:
                 "id": user.id,
                 "status": user.status.value,
                 "kyc_tier": user.kyc_tier,
+                "fail_count": user.failed_totp_attempts,
+                "locked_until": user.locked_until,
                 "expected_version": user.version - 1,  # caller bumped it on the entity
             },
         )
