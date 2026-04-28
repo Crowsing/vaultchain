@@ -1,5 +1,5 @@
 ---
-ac_count: 7
+ac_count: 8
 blocks:
 - phase1-deploy-001
 complexity: M
@@ -11,7 +11,7 @@ estimated_hours: 4
 id: phase1-web-004
 phase: 1
 sdd_mode: lightweight
-state: ready
+state: review
 title: Dashboard skeleton, Tier 0 banner, empty states
 touches_adrs: []
 ---
