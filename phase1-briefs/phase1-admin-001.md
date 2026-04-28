@@ -1,7 +1,7 @@
 ---
 ac_count: 8
 blocks:
-- phase1-admin-002
+- phase1-admin-002b
 - phase1-admin-003
 complexity: S
 context: admin
@@ -64,7 +64,7 @@ This brief delivers ONLY the bootstrapped Vite app with routing scaffolding and 
 
 ## Out of Scope
 
-- Admin auth API wiring: `phase1-admin-002`.
+- Admin auth API wiring: `phase1-admin-002a` (backend) + `phase1-admin-002b` (frontend).
 - Admin dashboard content: `phase1-admin-003`.
 - KYC review queue, withdrawal queue, audit log viewer, user management: Phase 3 admin briefs.
 - shadcn-ui components beyond the bare minimum needed for the login placeholder: added incrementally per brief.

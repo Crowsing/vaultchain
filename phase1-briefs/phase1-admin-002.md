@@ -1,25 +1,45 @@
 ---
 ac_count: 4
-blocks:
-- phase1-admin-003
+blocks: []
 complexity: M
 context: admin
-depends_on:
-- phase1-identity-001
-- phase1-identity-003
-- phase1-identity-004
-- phase1-shared-005
-- phase1-admin-001
+depends_on: []
 estimated_hours: 4
 id: phase1-admin-002
 phase: 1
 sdd_mode: strict
-state: blocked
-title: Admin auth (password + TOTP) + session
+state: obsolete
+title: Admin auth (password + TOTP) + session — SPLIT into 002a (backend) + 002b (frontend)
 touches_adrs: []
 ---
 
-# Brief: phase1-admin-002 — Admin auth (password + TOTP) + session
+# Brief: phase1-admin-002 — OBSOLETE: split into 002a + 002b
+
+> **OBSOLETE.** Operator chose option 2 from the blocked-state audit on
+> 2026-04-28: split this brief into:
+>
+> - [`phase1-admin-002a`](./phase1-admin-002a.md) — backend (port + bcrypt
+>   adapter + PasswordPolicy VO + AdminLogin/TotpVerify use cases + admin
+>   middleware + four routes + OpenAPI filter + Click seed CLI + the
+>   widened additive migration that adds `password_hash, actor_type,
+>   metadata, login_failure_count` to `identity.users`).
+> - [`phase1-admin-002b`](./phase1-admin-002b.md) — frontend (login.tsx,
+>   totp.tsx, admin apiFetch, CSRF wiring, AuthGuard).
+>
+> The original brief assumed `password_hash`, `actor_type`, and `metadata`
+> were already provisioned by `identity-001`; the audit confirmed they
+> were not. The migration scope therefore widened on the backend split.
+> Other briefs that previously listed `phase1-admin-002` in `blocks:` /
+> `depends_on:` were updated to point at `002a` and/or `002b` — see those
+> briefs' frontmatter for the new edges.
+>
+> The original brief body is preserved below for historical traceability.
+> Do not implement against this file — the canonical content lives in
+> `002a` and `002b`.
+
+---
+
+# Brief: phase1-admin-002 — Admin auth (password + TOTP) + session  (original, superseded)
 
 
 ## Title

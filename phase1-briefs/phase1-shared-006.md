@@ -2,6 +2,7 @@
 ac_count: 8
 blocks:
 - phase1-identity-005
+- phase1-admin-002a
 complexity: M
 context: shared
 depends_on:

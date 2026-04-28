@@ -5,7 +5,9 @@ graph LR
   classDef blocked fill:#fecaca;
   classDef review fill:#e9d5ff;
   phase1_admin_001["phase1-admin-001<br/>Admin SPA bootstrap (separate Vite app)"]:::merged
-  phase1_admin_002["phase1-admin-002<br/>Admin auth (password + TOTP) + session"]:::blocked
+  phase1_admin_002["phase1-admin-002<br/>Admin auth (password + TOTP) + session —"]:::obsolete
+  phase1_admin_002a["phase1-admin-002a<br/>Admin auth backend (password+TOTP, sessi"]:::ready
+  phase1_admin_002b["phase1-admin-002b<br/>Admin auth frontend (login + TOTP routes"]:::ready
   phase1_admin_003["phase1-admin-003<br/>Admin dashboard skeleton (empty queues)"]:::ready
   phase1_deploy_001["phase1-deploy-001<br/>Deploy backend + frontends to single Het"]:::ready
   phase1_identity_001["phase1-identity-001<br/>Identity domain (User, Session, MagicLin"]:::merged
@@ -71,13 +73,16 @@ graph LR
   phase4_evals_001["phase4-evals-001<br/>Tier-3 live evals harness (manual, not C"]:::ready
   phase4_polish_001["phase4-polish-001<br/>Empty/loading/error states pass + mobile"]:::ready
   phase4_web_008["phase4-web-008<br/>Chat panel UI + dashboard suggestions ba"]:::ready
-  phase1_identity_001 --> phase1_admin_002
-  phase1_identity_003 --> phase1_admin_002
-  phase1_identity_004 --> phase1_admin_002
-  phase1_shared_005 --> phase1_admin_002
-  phase1_admin_001 --> phase1_admin_002
+  phase1_identity_001 --> phase1_admin_002a
+  phase1_identity_003 --> phase1_admin_002a
+  phase1_identity_004 --> phase1_admin_002a
+  phase1_shared_005 --> phase1_admin_002a
+  phase1_shared_006 --> phase1_admin_002a
+  phase1_admin_001 --> phase1_admin_002b
+  phase1_admin_002a --> phase1_admin_002b
   phase1_admin_001 --> phase1_admin_003
-  phase1_admin_002 --> phase1_admin_003
+  phase1_admin_002a --> phase1_admin_003
+  phase1_admin_002b --> phase1_admin_003
   phase1_identity_005 --> phase1_deploy_001
   phase1_web_003 --> phase1_deploy_001
   phase1_web_004 --> phase1_deploy_001

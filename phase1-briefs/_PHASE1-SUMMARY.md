@@ -33,8 +33,9 @@
 | 13 | `phase1-web-005` | App shell, routing, session bootstrap | M | lightweight | web-001, web-002 |
 | 14 | `phase1-web-004` | Dashboard skeleton + Tier-0 banner + empty states | M | lightweight | web-005, web-002 |
 | 15 | `phase1-admin-001` | Admin SPA bootstrap (separate Vite app) | S | lightweight | — |
-| 16 | `phase1-admin-002` | Admin auth (password + TOTP) + session | M | strict | identity-001/003/004, shared-005, admin-001 |
-| 17 | `phase1-admin-003` | Admin dashboard skeleton (empty queues) | S | lightweight | admin-001, admin-002 |
+| 16a | `phase1-admin-002a` | Admin auth backend (password+TOTP, session, seed CLI) | M | strict | identity-001/003/004, shared-005/006 |
+| 16b | `phase1-admin-002b` | Admin auth frontend (login + TOTP routes) | S | lightweight | admin-001, admin-002a |
+| 17 | `phase1-admin-003` | Admin dashboard skeleton (empty queues) | S | lightweight | admin-001, admin-002a, admin-002b |
 | 18 | `phase1-deploy-001` | Deploy backend Fly.io + frontends Cloudflare Pages | M | lightweight | identity-005, web-003/004/005, admin-003 |
 
 > Note on web-004 / web-005 ordering: the original prior-session plan listed web-004 before web-005, but web-005 (the app shell) is the foundation web-004 (the dashboard inside the shell) renders inside. Corrected: web-005 ships first, web-004 ships after.
@@ -63,7 +64,8 @@ graph TD
   w005[web-005<br/>app shell]
 
   a001[admin-001<br/>SPA bootstrap]
-  a002[admin-002<br/>admin auth]
+  a002a[admin-002a<br/>admin auth backend]
+  a002b[admin-002b<br/>admin auth frontend]
   a003[admin-003<br/>dashboard skeleton]
 
   d001[deploy-001<br/>Fly + Cloudflare]
@@ -92,13 +94,16 @@ graph TD
   w005 --> w004
   w002 --> w004
 
-  i001 --> a002
-  i003 --> a002
-  i004 --> a002
-  s005 --> a002
-  a001 --> a002
+  i001 --> a002a
+  i003 --> a002a
+  i004 --> a002a
+  s005 --> a002a
+  s006 --> a002a
+  a001 --> a002b
+  a002a --> a002b
   a001 --> a003
-  a002 --> a003
+  a002a --> a003
+  a002b --> a003
 
   i005 --> d001
   w003 --> d001
@@ -111,7 +116,7 @@ graph TD
 
 ## Contradictions surfaced (`architecture-decisions.md` wins, briefs follow architecture)
 
-1. **JWT vs opaque session cookies.** `claude-code-spec.md` (line 654) proposes JWT for auth; `architecture-decisions.md` Section 4 explicitly rejects JWT and mandates opaque session tokens (`vc_at_<rand>` looked up in Redis). All identity briefs (002–005) and admin-002 follow the architecture-decisions pattern.
+1. **JWT vs opaque session cookies.** `claude-code-spec.md` (line 654) proposes JWT for auth; `architecture-decisions.md` Section 4 explicitly rejects JWT and mandates opaque session tokens (`vc_at_<rand>` looked up in Redis). All identity briefs (002–005) and admin-002a follow the architecture-decisions pattern.
 2. **Admin URL prefix.** `claude-code-spec.md` uses `/api/admin/...`; `architecture-decisions.md` Section 4 uses `/admin/api/v1/...`. Briefs follow architecture.
 
 Neither contradiction blocks generation. Both are flagged here so reviewers know which doc wins when they cross-read.
@@ -134,4 +139,4 @@ Neither contradiction blocks generation. Both are flagged here so reviewers know
 - The shared infra (UoW, outbox, idempotency, error envelope) is the foundation Phase 2 builds on. Custody, Chains, Audit will plug in via the EventBus already wired.
 - Stub modules (`walletsStub.ts`, `transactionsStub.ts`) are flagged for replacement.
 - ConsoleEmailSender remains in console mode — Phase 2 introduces a real email adapter (likely Postmark or SES) when KYC notification emails come into scope.
-- The audit-event publishes from admin-002 (`audit.AdminAuthenticated`) sit in the bus with no consumer; the Audit context in Phase 2 attaches a subscriber and replays from a checkpoint.
+- The audit-event publishes from admin-002a (`audit.AdminAuthenticated`) sit in the bus with no consumer; the Audit context in Phase 2 attaches a subscriber and replays from a checkpoint.
