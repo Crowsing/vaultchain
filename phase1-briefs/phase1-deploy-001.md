@@ -6,7 +6,7 @@ title: Deploy backend + frontends to single Hetzner VM via docker-compose-prod
 complexity: M
 sdd_mode: lightweight
 estimated_hours: 4
-state: in_progress
+state: merged
 depends_on:
 - phase1-identity-005
 - phase1-web-003
