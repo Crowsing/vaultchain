@@ -11,7 +11,7 @@ estimated_hours: 4
 id: phase1-web-004
 phase: 1
 sdd_mode: lightweight
-state: review
+state: merged
 title: Dashboard skeleton, Tier 0 banner, empty states
 touches_adrs: []
 ---
