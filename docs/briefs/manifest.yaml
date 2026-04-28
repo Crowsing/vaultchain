@@ -3,8 +3,9 @@ phase_state: in_progress
 counts:
   total: 67
   by_state:
+    in_progress: 1
     merged: 8
-    ready: 59
+    ready: 58
   by_phase:
     1: 18
     2: 17
@@ -155,7 +156,7 @@ briefs:
   title: Session management — cookies, CSRF, refresh-token rotation
   complexity: M
   sdd_mode: strict
-  state: ready
+  state: in_progress
   depends_on:
   - phase1-identity-001
   - phase1-shared-003
@@ -164,7 +165,7 @@ briefs:
   - phase1-admin-002
   touches_adrs:
   - ADR-002
-  ac_count: 2
+  ac_count: 10
   estimated_hours: 4
   path: phase1-briefs/phase1-identity-004.md
 - id: phase1-identity-005

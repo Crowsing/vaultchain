@@ -35,6 +35,14 @@
 - **Suggested user action:** n/a
 - **Related details fields:** _(none documented)_
 
+## `identity.csrf_failed`
+
+- **HTTP status:** 403 Forbidden
+- **Meaning:** Double-submit cookie / header mismatch on a mutating request.
+- **When emitted:** Per subclass-specific raise sites; see source.
+- **Suggested user action:** n/a
+- **Related details fields:** _(none documented)_
+
 ## `identity.invalid_state_transition`
 
 - **HTTP status:** 409 Conflict
@@ -59,6 +67,14 @@
 - **Suggested user action:** n/a
 - **Related details fields:** _(none documented)_
 
+## `identity.refresh_token_invalid`
+
+- **HTTP status:** 401 Unauthorized
+- **Meaning:** Refresh token does not match an active session; AC-phase1-identity-004-05/06.
+- **When emitted:** Per subclass-specific raise sites; see source.
+- **Suggested user action:** n/a
+- **Related details fields:** _(none documented)_
+
 ## `identity.totp_already_enrolled`
 
 - **HTTP status:** 409 Conflict
@@ -71,6 +87,14 @@
 
 - **HTTP status:** 404 Not Found
 - **Meaning:** Verify or regenerate without prior enrollment.
+- **When emitted:** Per subclass-specific raise sites; see source.
+- **Suggested user action:** n/a
+- **Related details fields:** _(none documented)_
+
+## `identity.unauthenticated`
+
+- **HTTP status:** 401 Unauthorized
+- **Meaning:** No valid session for the request; AC-phase1-identity-004-03.
 - **When emitted:** Per subclass-specific raise sites; see source.
 - **Suggested user action:** n/a
 - **Related details fields:** _(none documented)_

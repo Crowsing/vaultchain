@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
+from datetime import datetime
 from typing import Protocol, runtime_checkable
 from uuid import UUID
 
@@ -11,6 +13,18 @@ from vaultchain.identity.domain.aggregates import (
     TotpSecret,
     User,
 )
+
+
+@dataclass(frozen=True)
+class CachedAccessToken:
+    """Value-object payload backed by Redis. ``scopes`` is the forward-compat
+    hook for Phase-3 admin scopes; V1 user sessions get ``["user"]``.
+    """
+
+    user_id: UUID
+    expires_at: datetime
+    scopes: tuple[str, ...]
+    session_id: UUID
 
 
 @runtime_checkable
@@ -26,6 +40,7 @@ class SessionRepository(Protocol):
     async def add(self, session: Session) -> None: ...
     async def get_by_id(self, session_id: UUID) -> Session | None: ...
     async def get_by_refresh_token_hash(self, token_hash: bytes) -> Session | None: ...
+    async def list_active_by_user_id(self, user_id: UUID) -> list[Session]: ...
     async def update(self, session: Session) -> None: ...
 
 
@@ -65,6 +80,33 @@ class TotpCodeChecker(Protocol):
 
 
 @runtime_checkable
+class AccessTokenCache(Protocol):
+    """Cache the access-token payload by ``sha256(token)`` hex digest.
+
+    Implemented in V1 by Redis with ``SET EX`` for TTL. ``evict_by_session``
+    is the seam revocation uses to invalidate the *current* access-token
+    cache entry without the route handler holding the raw token (the route
+    only knows the session id).
+    """
+
+    async def set(self, token_sha256_hex: str, payload: CachedAccessToken) -> None: ...
+    async def get(self, token_sha256_hex: str) -> CachedAccessToken | None: ...
+    async def evict(self, token_sha256_hex: str) -> None: ...
+    async def evict_by_session(self, session_id: UUID) -> None: ...
+
+
+@runtime_checkable
+class RefreshTokenGenerator(Protocol):
+    """Pluggable token issuance — production uses ``secrets.token_urlsafe``,
+    tests inject a deterministic seed for reproducibility.
+    """
+
+    def generate_access_token(self) -> str: ...
+    def generate_refresh_token(self) -> str: ...
+    def generate_csrf_token(self) -> str: ...
+
+
+@runtime_checkable
 class BackupCodeService(Protocol):
     """Generates and validates one-time backup codes.
 
@@ -80,8 +122,11 @@ class BackupCodeService(Protocol):
 
 
 __all__ = [
+    "AccessTokenCache",
     "BackupCodeService",
+    "CachedAccessToken",
     "MagicLinkRepository",
+    "RefreshTokenGenerator",
     "SessionRepository",
     "TotpCodeChecker",
     "TotpSecretEncryptor",
