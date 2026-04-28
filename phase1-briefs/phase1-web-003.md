@@ -11,7 +11,7 @@ estimated_hours: 4
 id: phase1-web-003
 phase: 1
 sdd_mode: lightweight
-state: review
+state: merged
 title: Auth screens (signup, magic-link sent, login, TOTP enrollment)
 touches_adrs: []
 ---
