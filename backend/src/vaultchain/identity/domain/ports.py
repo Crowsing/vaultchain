@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime
+from enum import StrEnum
 from typing import Protocol, runtime_checkable
 from uuid import UUID
 
@@ -106,6 +107,35 @@ class RefreshTokenGenerator(Protocol):
     def generate_csrf_token(self) -> str: ...
 
 
+class PreTotpIntent(StrEnum):
+    """Disambiguates the two TOTP gates that a `pre-totp-token` opens."""
+
+    ENROLL = "enroll"
+    CHALLENGE = "challenge"
+
+
+@dataclass(frozen=True)
+class PreTotpPayload:
+    user_id: UUID
+    intent: PreTotpIntent
+
+
+@runtime_checkable
+class PreTotpTokenCache(Protocol):
+    """Backed by Redis at `pre_totp:<sha256(token)>`; 5-minute TTL.
+
+    The route-layer dependency `get_pre_totp_user(intent)` reads the
+    bearer token, hashes it, looks up the payload, and asserts intent
+    matches before passing the resolved user_id to the route handler.
+    On enrollment-confirm / TOTP-verify success, the route evicts the
+    entry — single-use semantics.
+    """
+
+    async def set(self, token_sha256_hex: str, payload: PreTotpPayload) -> None: ...
+    async def get(self, token_sha256_hex: str) -> PreTotpPayload | None: ...
+    async def evict(self, token_sha256_hex: str) -> None: ...
+
+
 @runtime_checkable
 class EmailSender(Protocol):
     """Sends transactional emails. V1 adapter prints to console (Resend/Postmark
@@ -154,6 +184,9 @@ __all__ = [
     "EmailSender",
     "MagicLinkRepository",
     "MagicLinkTokenGenerator",
+    "PreTotpIntent",
+    "PreTotpPayload",
+    "PreTotpTokenCache",
     "RefreshTokenGenerator",
     "SessionRepository",
     "TotpCodeChecker",

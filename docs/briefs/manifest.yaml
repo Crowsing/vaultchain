@@ -3,8 +3,9 @@ phase_state: in_progress
 counts:
   total: 67
   by_state:
+    in_progress: 1
     merged: 10
-    ready: 57
+    ready: 56
   by_phase:
     1: 18
     2: 17
@@ -173,7 +174,7 @@ briefs:
   title: Auth API endpoints + OpenAPI
   complexity: M
   sdd_mode: strict
-  state: ready
+  state: in_progress
   depends_on:
   - phase1-identity-002
   - phase1-identity-003
@@ -187,7 +188,7 @@ briefs:
   - phase1-deploy-001
   touches_adrs:
   - ADR-002
-  ac_count: 1
+  ac_count: 8
   estimated_hours: 4
   path: phase1-briefs/phase1-identity-005.md
 - id: phase1-shared-003

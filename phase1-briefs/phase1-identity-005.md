@@ -1,5 +1,5 @@
 ---
-ac_count: 1
+ac_count: 8
 blocks:
 - phase1-web-002
 - phase1-web-003
@@ -17,7 +17,7 @@ estimated_hours: 4
 id: phase1-identity-005
 phase: 1
 sdd_mode: strict
-state: ready
+state: in_progress
 title: Auth API endpoints + OpenAPI
 touches_adrs:
 - ADR-002

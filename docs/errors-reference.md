@@ -75,6 +75,14 @@
 - **Suggested user action:** n/a
 - **Related details fields:** _(none documented)_
 
+## `identity.pre_totp_token_invalid`
+
+- **HTTP status:** 401 Unauthorized
+- **Meaning:** The bearer pre-totp token is unknown, expired, or wrong intent;
+- **When emitted:** Per subclass-specific raise sites; see source.
+- **Suggested user action:** n/a
+- **Related details fields:** _(none documented)_
+
 ## `identity.refresh_token_invalid`
 
 - **HTTP status:** 401 Unauthorized
@@ -95,6 +103,14 @@
 
 - **HTTP status:** 404 Not Found
 - **Meaning:** Verify or regenerate without prior enrollment.
+- **When emitted:** Per subclass-specific raise sites; see source.
+- **Suggested user action:** n/a
+- **Related details fields:** _(none documented)_
+
+## `identity.totp_required`
+
+- **HTTP status:** 403 Forbidden
+- **Meaning:** Verified user without TOTP attempted a session-protected route;
 - **When emitted:** Per subclass-specific raise sites; see source.
 - **Suggested user action:** n/a
 - **Related details fields:** _(none documented)_
