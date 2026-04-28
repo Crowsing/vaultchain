@@ -63,11 +63,42 @@ class UserLocked(_SharedPermissionError):
     default_message: ClassVar[str] = "User is locked; try again after the lockout window."
 
 
+class Unauthenticated(DomainError):
+    """No valid session for the request; AC-phase1-identity-004-03."""
+
+    code: ClassVar[str] = "identity.unauthenticated"
+    status_code: ClassVar[int] = HTTPStatus.UNAUTHORIZED
+    default_message: ClassVar[str] = "Authentication required."
+
+
+class RefreshTokenInvalid(DomainError):
+    """Refresh token does not match an active session; AC-phase1-identity-004-05/06.
+
+    The same code is raised for unknown / revoked / expired refresh tokens
+    on purpose — differentiating leaks information to attackers.
+    """
+
+    code: ClassVar[str] = "identity.refresh_token_invalid"
+    status_code: ClassVar[int] = HTTPStatus.UNAUTHORIZED
+    default_message: ClassVar[str] = "Refresh token is invalid or expired."
+
+
+class CsrfFailed(_SharedPermissionError):
+    """Double-submit cookie / header mismatch on a mutating request."""
+
+    code: ClassVar[str] = "identity.csrf_failed"
+    status_code: ClassVar[int] = HTTPStatus.FORBIDDEN
+    default_message: ClassVar[str] = "CSRF check failed."
+
+
 __all__ = [
+    "CsrfFailed",
     "InvalidStateTransition",
     "MagicLinkAlreadyUsed",
     "MagicLinkExpired",
+    "RefreshTokenInvalid",
     "TotpAlreadyEnrolled",
     "TotpNotEnrolled",
+    "Unauthenticated",
     "UserLocked",
 ]

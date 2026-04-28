@@ -84,6 +84,7 @@ class UserLockedDueToTotpFailures(DomainEvent):
     event_type: ClassVar[str] = "identity.user_locked_due_to_totp_failures"
 
 
+@register_event
 @dataclass(frozen=True, kw_only=True)
 class SessionCreated(DomainEvent):
     user_id: UUID
@@ -91,6 +92,17 @@ class SessionCreated(DomainEvent):
     event_type: ClassVar[str] = "identity.session_created"
 
 
+@register_event
+@dataclass(frozen=True, kw_only=True)
+class SessionRefreshed(DomainEvent):
+    """Refresh token rotated in place — same session id, fresh hash."""
+
+    user_id: UUID
+    aggregate_type: ClassVar[str] = "session"
+    event_type: ClassVar[str] = "identity.session_refreshed"
+
+
+@register_event
 @dataclass(frozen=True, kw_only=True)
 class SessionRevoked(DomainEvent):
     user_id: UUID
@@ -107,6 +119,7 @@ __all__ = [
     "MagicLinkConsumed",
     "MagicLinkRequested",
     "SessionCreated",
+    "SessionRefreshed",
     "SessionRevoked",
     "TotpEnrolled",
     "TotpVerificationFailed",

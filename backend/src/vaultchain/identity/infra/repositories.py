@@ -145,6 +145,18 @@ class SqlAlchemySessionRepository:
         ).one_or_none()
         return _session_from_row(row) if row else None
 
+    async def list_active_by_user_id(self, user_id: UUID) -> list[Session]:
+        rows = (
+            await self._session.execute(
+                sa.text(
+                    "SELECT * FROM identity.sessions "
+                    "WHERE user_id=:uid AND revoked_at IS NULL AND expires_at > NOW()"
+                ),
+                {"uid": user_id},
+            )
+        ).all()
+        return [_session_from_row(r) for r in rows]
+
     async def update(self, sess: Session) -> None:
         result = await self._session.execute(
             sa.text(
