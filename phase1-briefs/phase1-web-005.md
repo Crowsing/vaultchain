@@ -13,7 +13,7 @@ estimated_hours: 4
 id: phase1-web-005
 phase: 1
 sdd_mode: lightweight
-state: review
+state: merged
 title: App shell, routing, session bootstrap
 touches_adrs: []
 ---

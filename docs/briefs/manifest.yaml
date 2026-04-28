@@ -4,9 +4,8 @@ counts:
   total: 67
   by_state:
     blocked: 1
-    merged: 12
+    merged: 13
     ready: 53
-    review: 1
   by_phase:
     1: 18
     2: 17
@@ -326,7 +325,7 @@ briefs:
   title: App shell, routing, session bootstrap
   complexity: M
   sdd_mode: lightweight
-  state: review
+  state: merged
   depends_on:
   - phase1-web-001
   - phase1-web-002
