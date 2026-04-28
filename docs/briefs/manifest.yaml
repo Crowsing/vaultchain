@@ -3,8 +3,7 @@ phase_state: in_progress
 counts:
   total: 69
   by_state:
-    in_progress: 1
-    merged: 17
+    merged: 18
     obsolete: 1
     ready: 50
   by_phase:
@@ -103,7 +102,7 @@ briefs:
   title: Admin dashboard skeleton (empty queues)
   complexity: S
   sdd_mode: lightweight
-  state: in_progress
+  state: merged
   depends_on:
   - phase1-admin-001
   - phase1-admin-002a

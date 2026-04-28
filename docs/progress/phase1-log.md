@@ -10,3 +10,4 @@
 2026-04-27T21:27:15Z | merged | phase1-shared-004 | PR #11 (fix-up via chore/post-shared-004-fixup; manifest-on-merge couldn't push due to branch protection — 6th in a row)
 2026-04-28T15:06:02Z | merged | phase1-admin-002a | PR #37 (fix-up via chore/post-phase1-admin-002a-fixup; manifest-on-merge couldn't push due to branch protection; CI Stages 2-4 cancelled by auto-merge — re-ran green on main)
 2026-04-28T15:50:30Z | merged | phase1-admin-002b | PR #39 (fix-up via chore/post-phase1-admin-002b-fixup; manifest-on-merge couldn't push due to branch protection — same as prior fix-ups)
+2026-04-28T16:14:30Z | merged | phase1-admin-003 | PR #41 (fix-up via chore/post-phase1-admin-003-fixup; manifest-on-merge couldn't push due to branch protection — same pattern)
