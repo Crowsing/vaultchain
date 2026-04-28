@@ -6,7 +6,7 @@ title: Admin dashboard skeleton (empty queues)
 complexity: S
 sdd_mode: lightweight
 estimated_hours: 4
-state: in_progress
+state: merged
 depends_on:
 - phase1-admin-001
 - phase1-admin-002a
