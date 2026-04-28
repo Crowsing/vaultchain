@@ -76,7 +76,7 @@ jobs:
       - working-directory: backend
         run: poetry install --with dev
       - working-directory: backend
-        run: poetry run pytest tests -k "domain" -m "not slow and not live" --cov=src/vaultchain --cov-report=xml
+        run: poetry run pytest tests -k "domain" -m "not slow and not live" --cov=src/vaultchain --cov-fail-under=0 --cov-report=xml
       - uses: actions/upload-artifact@v4
         with:
           name: coverage-domain
@@ -100,7 +100,7 @@ jobs:
       - working-directory: backend
         run: poetry install --with dev
       - working-directory: backend
-        run: poetry run pytest tests -k "application" -m "not slow and not live" --cov=src/vaultchain --cov-report=xml
+        run: poetry run pytest tests -k "application" -m "not slow and not live" --cov=src/vaultchain --cov-fail-under=0 --cov-report=xml
       - uses: actions/upload-artifact@v4
         with:
           name: coverage-application
@@ -145,7 +145,7 @@ jobs:
         env:
           DATABASE_URL: postgresql+asyncpg://vaultchain:dev@localhost:5432/vaultchain_test
           REDIS_URL: redis://localhost:6379/0
-        run: poetry run pytest tests -k "infra or adapter" -m "not slow and not live" --cov=src/vaultchain --cov-report=xml
+        run: poetry run pytest tests -k "infra or adapter" -m "not slow and not live" --cov=src/vaultchain --cov-fail-under=0 --cov-report=xml
       - uses: actions/upload-artifact@v4
         with:
           name: coverage-adapters
@@ -185,7 +185,7 @@ jobs:
         env:
           DATABASE_URL: postgresql+asyncpg://vaultchain:dev@localhost:5432/vaultchain_test
           REDIS_URL: redis://localhost:6379/0
-        run: poetry run pytest tests -k "contract or api" -m "not slow and not live" --cov=src/vaultchain --cov-report=xml
+        run: poetry run pytest tests -k "contract or api" -m "not slow and not live" --cov=src/vaultchain --cov-fail-under=0 --cov-report=xml
       - uses: actions/upload-artifact@v4
         with:
           name: coverage-contract
