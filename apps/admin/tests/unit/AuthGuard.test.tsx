@@ -123,7 +123,7 @@ describe("AuthGuard (AC-phase1-admin-002b-03)", () => {
   });
 
   it("calls /me only once on app load", async () => {
-    mockedMe.mockResolvedValueOnce({
+    mockedMe.mockResolvedValue({
       id: "11111111-1111-1111-1111-111111111111",
       email: "admin@vaultchain.example",
       full_name: "Demo Admin",
@@ -132,13 +132,18 @@ describe("AuthGuard (AC-phase1-admin-002b-03)", () => {
     });
 
     renderGuard("/dashboard");
-    await waitFor(() => expect(mockedMe).toHaveBeenCalledTimes(1));
+    await waitFor(() => {
+      expect(useAdminAuthStore.getState().bootstrapped).toBe(true);
+    });
+    expect(mockedMe).toHaveBeenCalledTimes(1);
 
     // Re-render under the same store state — bootstrapped flag should
     // suppress further /me calls.
     renderGuard("/dashboard");
     await waitFor(() => {
-      expect(useAdminAuthStore.getState().bootstrapped).toBe(true);
+      expect(screen.getAllByTestId("dashboard-probe").length).toBeGreaterThan(
+        0,
+      );
     });
     expect(mockedMe).toHaveBeenCalledTimes(1);
   });

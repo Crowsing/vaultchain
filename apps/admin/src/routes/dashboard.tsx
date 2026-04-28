@@ -1,50 +1,61 @@
 import { AdminShellAuthed } from "@/components/admin-shell";
-import { adminLogout } from "@/auth/api";
-import { useAdminAuthStore } from "@/auth/store";
-import { useNavigate } from "react-router-dom";
+import { QueueCard } from "@/components/queue-card";
 
 export default function DashboardRoute() {
-  const user = useAdminAuthStore((s) => s.user);
-  const clear = useAdminAuthStore((s) => s.clear);
-  const navigate = useNavigate();
-
-  async function onLogout() {
-    try {
-      await adminLogout();
-    } finally {
-      clear();
-      navigate("/login", { replace: true });
-    }
-  }
-
   return (
     <AdminShellAuthed>
-      <header className="flex items-center justify-between mb-6">
+      <header className="mb-6">
         <h1
           className="text-xl font-semibold"
           style={{ color: "var(--text-primary)" }}
         >
           Dashboard
         </h1>
-        <button
-          type="button"
-          className="btn btn-secondary btn-md"
-          data-testid="admin-logout"
-          onClick={onLogout}
-        >
-          Sign out
-        </button>
       </header>
-      <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-        Welcome
-        {user?.full_name
-          ? ` ${user.full_name}`
-          : user?.email
-            ? ` ${user.email}`
-            : ""}
-        . Phase 3 will land applicants, transactions, withdrawals, and audit
-        views here.
-      </p>
+      <section
+        data-testid="dashboard-cards"
+        className="grid gap-4"
+        style={{
+          gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+        }}
+      >
+        <QueueCard
+          testId="dashboard-card-kyc"
+          label="KYC Queue"
+          count={0}
+          href="/applicants"
+          openLabel="Open queue"
+        />
+        <QueueCard
+          testId="dashboard-card-withdrawals"
+          label="Withdrawals Pending"
+          count={0}
+          href="/withdrawals"
+          openLabel="Open queue"
+        />
+        <QueueCard
+          testId="dashboard-card-transactions"
+          label="Recent Transactions"
+          count={0}
+          href="/transactions"
+          openLabel="Open list"
+        />
+        <QueueCard
+          testId="dashboard-card-audit"
+          label="Audit Events Today"
+          count={0}
+          href="/audit"
+          openLabel="Open log"
+        />
+      </section>
+      <footer className="mt-8" style={{ color: "var(--text-secondary)" }}>
+        <p
+          data-testid="dashboard-phase-note"
+          style={{ fontSize: "8px", opacity: 0.6 }}
+        >
+          Phase 1 — admin shell
+        </p>
+      </footer>
     </AdminShellAuthed>
   );
 }

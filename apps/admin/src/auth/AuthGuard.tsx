@@ -6,6 +6,7 @@ import { useAdminAuthStore } from "./store";
 import { ApiError } from "./types";
 
 const PUBLIC_PATHS = new Set(["/login", "/totp"]);
+const SPLASH_MIN_MS = 250;
 
 type AuthGuardProps = {
   children: React.ReactNode;
@@ -16,10 +17,15 @@ export function AuthGuard({ children }: AuthGuardProps) {
   const { user, bootstrapped, setUser, markBootstrapped, clear } =
     useAdminAuthStore();
   const [error, setError] = useState<unknown>(null);
+  const [splashElapsed, setSplashElapsed] = useState(false);
 
   useEffect(() => {
-    if (bootstrapped) return;
+    if (bootstrapped) {
+      setSplashElapsed(true);
+      return;
+    }
     let cancelled = false;
+    const start = Date.now();
     void adminMe()
       .then((u) => {
         if (!cancelled) setUser(u);
@@ -33,7 +39,16 @@ export function AuthGuard({ children }: AuthGuardProps) {
         setError(e);
       })
       .finally(() => {
-        if (!cancelled) markBootstrapped();
+        if (cancelled) return;
+        const elapsed = Date.now() - start;
+        const wait = Math.max(0, SPLASH_MIN_MS - elapsed);
+        const finalize = () => {
+          if (cancelled) return;
+          markBootstrapped();
+          setSplashElapsed(true);
+        };
+        if (wait === 0) finalize();
+        else setTimeout(finalize, wait);
       });
     return () => {
       cancelled = true;
@@ -42,7 +57,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
 
   const isPublic = PUBLIC_PATHS.has(location.pathname);
 
-  if (!bootstrapped) {
+  if (!bootstrapped || !splashElapsed) {
     return (
       <div
         data-testid="auth-guard-loading"
@@ -69,7 +84,14 @@ export function AuthGuard({ children }: AuthGuardProps) {
   }
 
   if (!user && !isPublic) {
-    return <Navigate to="/login" replace state={{ from: location.pathname }} />;
+    const redirectTarget =
+      location.pathname + (location.search || "") + (location.hash || "");
+    const params = new URLSearchParams();
+    if (redirectTarget && redirectTarget !== "/login") {
+      params.set("redirect", redirectTarget);
+    }
+    const search = params.toString();
+    return <Navigate to={search ? `/login?${search}` : "/login"} replace />;
   }
 
   return <>{children}</>;

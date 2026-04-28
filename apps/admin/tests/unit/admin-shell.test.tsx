@@ -1,7 +1,9 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { MemoryRouter } from "react-router-dom";
+import { beforeEach, describe, expect, it } from "vitest";
 
 import { AdminShellAuthed, AdminShellEmpty } from "@/components/admin-shell";
+import { useAdminAuthStore } from "@/auth/store";
 
 describe("AdminShellEmpty", () => {
   it("renders only a centered main column with no sidebar/header", () => {
@@ -19,11 +21,26 @@ describe("AdminShellEmpty", () => {
 });
 
 describe("AdminShellAuthed", () => {
+  beforeEach(() => {
+    useAdminAuthStore.setState({
+      user: {
+        id: "11111111-1111-1111-1111-111111111111",
+        email: "admin@vaultchain.example",
+        full_name: "Demo Admin",
+        role: "admin",
+        last_login_at: null,
+      },
+      bootstrapped: true,
+    });
+  });
+
   it("renders sidebar, header, and main content slots", () => {
     render(
-      <AdminShellAuthed>
-        <p>dashboard</p>
-      </AdminShellAuthed>,
+      <MemoryRouter>
+        <AdminShellAuthed>
+          <p>dashboard</p>
+        </AdminShellAuthed>
+      </MemoryRouter>,
     );
 
     expect(screen.getByTestId("admin-shell-authed")).toBeInTheDocument();
