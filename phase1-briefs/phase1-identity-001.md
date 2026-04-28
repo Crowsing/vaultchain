@@ -13,7 +13,7 @@ estimated_hours: 4
 id: phase1-identity-001
 phase: 1
 sdd_mode: strict
-state: in_progress
+state: merged
 title: Identity domain (User, Session, MagicLink, TotpSecret)
 touches_adrs: []
 ---
