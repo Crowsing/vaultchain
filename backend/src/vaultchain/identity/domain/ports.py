@@ -163,6 +163,17 @@ class MagicLinkTokenGenerator(Protocol):
 
 
 @runtime_checkable
+class PasswordHasher(Protocol):
+    """Hash and verify admin passwords. V1 adapter wraps ``bcrypt`` at
+    cost 12; the verify roundtrip property test (`tests/identity/domain/
+    test_password_hasher_properties.py`) covers any future swap-in.
+    """
+
+    def hash(self, password: str) -> str: ...
+    def verify(self, password: str, hashed: str) -> bool: ...
+
+
+@runtime_checkable
 class BackupCodeService(Protocol):
     """Generates and validates one-time backup codes.
 
@@ -184,6 +195,7 @@ __all__ = [
     "EmailSender",
     "MagicLinkRepository",
     "MagicLinkTokenGenerator",
+    "PasswordHasher",
     "PreTotpIntent",
     "PreTotpPayload",
     "PreTotpTokenCache",

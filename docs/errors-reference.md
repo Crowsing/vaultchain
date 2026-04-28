@@ -35,10 +35,26 @@
 - **Suggested user action:** n/a
 - **Related details fields:** _(none documented)_
 
+## `identity.admin_required`
+
+- **HTTP status:** 403 Forbidden
+- **Meaning:** User-actor session presented at an admin endpoint;
+- **When emitted:** Per subclass-specific raise sites; see source.
+- **Suggested user action:** n/a
+- **Related details fields:** _(none documented)_
+
 ## `identity.csrf_failed`
 
 - **HTTP status:** 403 Forbidden
 - **Meaning:** Double-submit cookie / header mismatch on a mutating request.
+- **When emitted:** Per subclass-specific raise sites; see source.
+- **Suggested user action:** n/a
+- **Related details fields:** _(none documented)_
+
+## `identity.invalid_credentials`
+
+- **HTTP status:** 401 Unauthorized
+- **Meaning:** Email + password pair does not match a stored admin row;
 - **When emitted:** Per subclass-specific raise sites; see source.
 - **Suggested user action:** n/a
 - **Related details fields:** _(none documented)_
@@ -87,6 +103,14 @@
 
 - **HTTP status:** 401 Unauthorized
 - **Meaning:** Refresh token does not match an active session; AC-phase1-identity-004-05/06.
+- **When emitted:** Per subclass-specific raise sites; see source.
+- **Suggested user action:** n/a
+- **Related details fields:** _(none documented)_
+
+## `identity.session_required`
+
+- **HTTP status:** 401 Unauthorized
+- **Meaning:** Admin endpoint hit without a valid ``admin_at`` cookie;
 - **When emitted:** Per subclass-specific raise sites; see source.
 - **Suggested user action:** n/a
 - **Related details fields:** _(none documented)_

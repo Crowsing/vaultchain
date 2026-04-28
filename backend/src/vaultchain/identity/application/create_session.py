@@ -70,6 +70,7 @@ class CreateSession:
         user_id: UUID,
         user_agent: str = "",
         ip: str | None = None,
+        scopes: tuple[str, ...] = DEFAULT_SCOPES,
     ) -> CreateSessionResult:
         access_raw = self._token_gen.generate_access_token()
         refresh_raw = self._token_gen.generate_refresh_token()
@@ -105,7 +106,7 @@ class CreateSession:
             CachedAccessToken(
                 user_id=user_id,
                 expires_at=access_expires_at,
-                scopes=DEFAULT_SCOPES,
+                scopes=scopes,
                 session_id=session_id,
             ),
         )

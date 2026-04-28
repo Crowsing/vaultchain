@@ -15,7 +15,7 @@ estimated_hours: 4
 id: phase1-admin-002a
 phase: 1
 sdd_mode: strict
-state: in_progress
+state: review
 title: Admin auth backend (password+TOTP, session, seed CLI)
 touches_adrs: []
 ---

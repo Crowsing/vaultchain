@@ -24,6 +24,7 @@ from tests.identity.fakes.fake_encryptor import FakeTotpEncryptor
 from tests.identity.fakes.fake_magic_link_token_generator import (
     DeterministicMagicLinkTokenGenerator,
 )
+from tests.identity.fakes.fake_password_hasher import FakePasswordHasher
 from tests.identity.fakes.fake_pre_totp_cache import FakePreTotpTokenCache
 from tests.identity.fakes.fake_repositories import (
     InMemoryMagicLinkRepository,
@@ -36,6 +37,8 @@ from tests.identity.fakes.fake_totp_checker import (
     FakeTotpCodeChecker,
 )
 from tests.identity.fakes.fake_uow import FakeUnitOfWork
+from vaultchain.identity.application.admin_login import AdminLogin
+from vaultchain.identity.application.admin_totp_verify import AdminTotpVerify
 from vaultchain.identity.application.consume_magic_link import ConsumeMagicLink
 from vaultchain.identity.application.create_session import CreateSession
 from vaultchain.identity.application.enroll_totp import EnrollTotp
@@ -46,10 +49,14 @@ from vaultchain.identity.application.revoke_session import RevokeSession
 from vaultchain.identity.application.verify_totp import VerifyTotp
 from vaultchain.identity.delivery.composition import (
     get_access_cache,
+    get_admin_login,
+    get_admin_totp_verify,
     get_consume_magic_link,
     get_create_session,
+    get_current_admin,
     get_current_user,
     get_enroll_totp,
+    get_password_hasher,
     get_pre_totp_cache,
     get_refresh_session,
     get_regenerate_backup_codes,
@@ -59,10 +66,11 @@ from vaultchain.identity.delivery.composition import (
     get_uow_factory,
     get_verify_totp,
 )
+from vaultchain.identity.delivery.dependencies.admin_user import GetCurrentAdmin
 from vaultchain.identity.delivery.dependencies.current_user import (
     GetCurrentUser,
 )
-from vaultchain.identity.delivery.routes import build_identity_router
+from vaultchain.identity.delivery.routes import build_admin_router, build_identity_router
 from vaultchain.shared.delivery import (
     RequestIdMiddleware,
     register_error_handlers,
@@ -85,6 +93,7 @@ class AppState:
         self.totp_checker = FakeTotpCodeChecker(accepted_codes=("123456",))
         self.totp_encryptor = FakeTotpEncryptor()
         self.backup_codes = FakeBackupCodeService()
+        self.password_hasher = FakePasswordHasher()
 
 
 def _identity_overrides(state: AppState) -> dict[Callable[..., Any], Callable[..., Any]]:
@@ -161,7 +170,48 @@ def _identity_overrides(state: AppState) -> dict[Callable[..., Any], Callable[..
             backup_codes=state.backup_codes,
         ),
         get_current_user: _build_current_user_resolver(state, _user_repo_factory),
+        get_password_hasher: lambda: state.password_hasher,
+        get_admin_login: lambda: AdminLogin(
+            uow_factory=lambda: FakeUnitOfWork(),
+            users=_user_repo_factory,
+            password_hasher=state.password_hasher,
+        ),
+        get_admin_totp_verify: lambda: AdminTotpVerify(
+            uow_factory=lambda: FakeUnitOfWork(),
+            users=_user_repo_factory,
+            verify_totp=VerifyTotp(
+                uow_factory=lambda: FakeUnitOfWork(),
+                users=_user_repo_factory,
+                totps=_totp_repo_factory,
+                encryptor=state.totp_encryptor,
+                code_checker=state.totp_checker,
+                backup_codes=state.backup_codes,
+            ),
+            create_session=CreateSession(
+                uow_factory=lambda: FakeUnitOfWork(),
+                sessions=_session_repo_factory,
+                cache=state.access_cache,
+                token_gen=state.token_gen,
+            ),
+        ),
+        get_current_admin: _build_current_admin_resolver(state, _user_repo_factory),
     }
+
+
+def _build_current_admin_resolver(
+    state: AppState, user_repo_factory: Callable[[Any], Any]
+) -> Callable[[Request], Any]:
+    """Mirror ``_build_current_user_resolver`` for the admin scope."""
+    gca = GetCurrentAdmin(
+        cache=state.access_cache,
+        uow_factory=lambda: FakeUnitOfWork(),
+        users=user_repo_factory,
+    )
+
+    async def _resolver(request: Request) -> Any:
+        return await gca(request)
+
+    return _resolver
 
 
 def _build_current_user_resolver(
@@ -183,17 +233,24 @@ def _build_current_user_resolver(
     return _resolver
 
 
-def build_test_app(state: AppState | None = None) -> tuple[FastAPI, AppState]:
+def build_test_app(
+    state: AppState | None = None,
+    *,
+    include_admin: bool = False,
+) -> tuple[FastAPI, AppState]:
     """Compose an app whose composition resolvers are patched to fakes.
 
     The returned `TestState` lets tests poke the in-memory repos to
-    verify side effects.
+    verify side effects. ``include_admin=True`` mounts the
+    ``/admin/api/v1`` router for admin contract tests.
     """
     state = state or AppState()
     app = FastAPI()
     app.add_middleware(RequestIdMiddleware)
     register_error_handlers(app)
     app.include_router(build_identity_router())
+    if include_admin:
+        app.include_router(build_admin_router())
     overrides = _identity_overrides(state)
     for original, replacement in overrides.items():
         app.dependency_overrides[original] = replacement

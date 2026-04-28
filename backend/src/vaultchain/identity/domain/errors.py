@@ -127,14 +127,49 @@ class PreTotpTokenInvalid(DomainError):
     default_message: ClassVar[str] = "Pre-TOTP token is invalid or expired."
 
 
+class InvalidCredentials(DomainError):
+    """Email + password pair does not match a stored admin row;
+    AC-phase1-admin-002a-02. Same code regardless of which leg
+    (email unknown, wrong password) failed — leak nothing.
+    """
+
+    code: ClassVar[str] = "identity.invalid_credentials"
+    status_code: ClassVar[int] = HTTPStatus.UNAUTHORIZED
+    default_message: ClassVar[str] = "Invalid email or password."
+
+
+class SessionRequired(DomainError):
+    """Admin endpoint hit without a valid ``admin_at`` cookie;
+    AC-phase1-admin-002a-04. Distinct from ``identity.unauthenticated``
+    so logs disambiguate user-side from admin-side auth failures.
+    """
+
+    code: ClassVar[str] = "identity.session_required"
+    status_code: ClassVar[int] = HTTPStatus.UNAUTHORIZED
+    default_message: ClassVar[str] = "Admin session required."
+
+
+class AdminRequired(_SharedPermissionError):
+    """User-actor session presented at an admin endpoint;
+    AC-phase1-admin-002a-04.
+    """
+
+    code: ClassVar[str] = "identity.admin_required"
+    status_code: ClassVar[int] = HTTPStatus.FORBIDDEN
+    default_message: ClassVar[str] = "Admin role required for this endpoint."
+
+
 __all__ = [
+    "AdminRequired",
     "CsrfFailed",
+    "InvalidCredentials",
     "InvalidStateTransition",
     "MagicLinkAlreadyUsed",
     "MagicLinkExpired",
     "MagicLinkInvalid",
     "PreTotpTokenInvalid",
     "RefreshTokenInvalid",
+    "SessionRequired",
     "TotpAlreadyEnrolled",
     "TotpNotEnrolled",
     "TotpRequired",

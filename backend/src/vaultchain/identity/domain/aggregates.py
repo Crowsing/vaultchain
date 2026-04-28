@@ -11,7 +11,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 from enum import StrEnum
-from typing import TYPE_CHECKING, Final
+from typing import TYPE_CHECKING, Any, Final
 from uuid import UUID, uuid4
 
 from vaultchain.identity.domain.errors import (
@@ -19,6 +19,7 @@ from vaultchain.identity.domain.errors import (
     MagicLinkAlreadyUsed,
     MagicLinkExpired,
 )
+from vaultchain.identity.domain.value_objects import ActorType
 
 if TYPE_CHECKING:
     from vaultchain.identity.domain.ports import TotpSecretEncryptor
@@ -49,6 +50,14 @@ TOTP_LOCKOUT_THRESHOLD: Final[int] = 5
 #: Self-healing lockout window per AC-phase1-identity-003-06/07.
 TOTP_LOCKOUT_WINDOW: Final[timedelta] = timedelta(minutes=15)
 
+#: Wrong admin-password attempts permitted before lockout — stricter than
+#: the user-side TOTP threshold because admins are higher-value targets.
+ADMIN_PASSWORD_LOCKOUT_THRESHOLD: Final[int] = 5
+#: Sliding window over which admin password failures are counted.
+ADMIN_PASSWORD_FAILURE_WINDOW: Final[timedelta] = timedelta(minutes=15)
+#: Lockout duration after the admin password threshold trips.
+ADMIN_PASSWORD_LOCKOUT_WINDOW: Final[timedelta] = timedelta(minutes=30)
+
 
 @dataclass
 class User:
@@ -62,6 +71,10 @@ class User:
     updated_at: datetime | None = None
     failed_totp_attempts: int = 0
     locked_until: datetime | None = None
+    password_hash: str | None = None
+    actor_type: ActorType = ActorType.USER
+    metadata: dict[str, Any] = field(default_factory=dict)
+    login_failure_count: int = 0
     _pending_events: list[DomainEvent] = field(default_factory=list, repr=False, compare=False)
 
     @classmethod
@@ -72,6 +85,103 @@ class User:
         u = cls(id=uid, email=email, email_hash=email_hash)
         u._pending_events.append(UserSignedUp(aggregate_id=uid, email=email))
         return u
+
+    @classmethod
+    def seed_admin(
+        cls,
+        *,
+        email: str,
+        email_hash: bytes,
+        password_hash: str,
+        full_name: str = "",
+        role: str = "admin",
+        user_id: UUID | None = None,
+    ) -> User:
+        """Construct an admin-actor User row for the seed CLI.
+
+        Admin rows are VERIFIED on creation (no magic-link verification
+        path), carry their bcrypt ``password_hash``, and store
+        ``full_name`` + ``role`` inside the JSONB ``metadata`` column.
+        """
+        uid = user_id or uuid4()
+        return cls(
+            id=uid,
+            email=email,
+            email_hash=email_hash,
+            status=UserStatus.VERIFIED,
+            actor_type=ActorType.ADMIN,
+            password_hash=password_hash,
+            metadata={"full_name": full_name, "admin_role": role},
+        )
+
+    def is_admin(self) -> bool:
+        return self.actor_type is ActorType.ADMIN
+
+    def record_password_failure(self, *, now: datetime | None = None) -> bool:
+        """Increment the password-failure counter; bump version exactly once.
+
+        Returns ``True`` when this failure pushed the counter to the
+        admin lockout threshold — the caller should immediately invoke
+        ``lock_due_to_password_failures`` (which does NOT re-bump version,
+        keeping the persistence-layer optimistic-lock contract intact at
+        a single +1 per UoW update).
+        """
+        self.login_failure_count += 1
+        self.version += 1
+        self.updated_at = now or _utc_now()
+        return self.login_failure_count >= ADMIN_PASSWORD_LOCKOUT_THRESHOLD
+
+    def lock_due_to_password_failures(self, *, now: datetime | None = None) -> None:
+        """Apply the admin-password lockout per AC-phase1-admin-002a-02.
+
+        Idempotent while the user is already locked. Raises if the
+        threshold has not been reached, so a wiring bug surfaces.
+        Version is NOT bumped here — the caller already bumped it via
+        ``record_password_failure``. Both transitions land in a single
+        UPDATE.
+        """
+        moment = now or _utc_now()
+        if self.is_locked_now(now=moment):
+            return
+        if self.login_failure_count < ADMIN_PASSWORD_LOCKOUT_THRESHOLD:
+            raise InvalidStateTransition(
+                details={
+                    "from": self.status.value,
+                    "reason": "password_failure_threshold_not_reached",
+                    "login_failure_count": self.login_failure_count,
+                }
+            )
+        self.locked_until = moment + ADMIN_PASSWORD_LOCKOUT_WINDOW
+        self.status = UserStatus.LOCKED
+        self.updated_at = moment
+
+    def clear_password_failures(self, *, now: datetime | None = None) -> None:
+        """Reset the password-failure counter on successful verification.
+
+        Mirrors ``clear_totp_failures`` but only touches the password
+        counter; the TOTP counter / shared ``locked_until`` belong to
+        the TOTP path. No-op when the counter is already 0.
+        """
+        if self.login_failure_count == 0:
+            return
+        self.login_failure_count = 0
+        self.version += 1
+        self.updated_at = now or _utc_now()
+
+    def clear_password_lockout(self, *, now: datetime | None = None) -> None:
+        """Self-heal the password lockout when the window has elapsed.
+
+        Coalesces all the resets (counter, locked_until, status) into a
+        single +1 version bump.
+        """
+        if self.login_failure_count == 0 and self.locked_until is None:
+            return
+        self.login_failure_count = 0
+        self.locked_until = None
+        if self.status is UserStatus.LOCKED:
+            self.status = UserStatus.VERIFIED
+        self.version += 1
+        self.updated_at = now or _utc_now()
 
     def verify_email(self) -> None:
         if self.status == UserStatus.VERIFIED:
@@ -244,6 +354,9 @@ class TotpSecret:
 
 
 __all__ = [
+    "ADMIN_PASSWORD_FAILURE_WINDOW",
+    "ADMIN_PASSWORD_LOCKOUT_THRESHOLD",
+    "ADMIN_PASSWORD_LOCKOUT_WINDOW",
     "TOTP_LOCKOUT_THRESHOLD",
     "TOTP_LOCKOUT_WINDOW",
     "MagicLink",

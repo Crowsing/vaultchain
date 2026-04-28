@@ -15,7 +15,7 @@ from sqlalchemy import (
     Text,
     func,
 )
-from sqlalchemy.dialects.postgresql import ARRAY, INET, TIMESTAMP
+from sqlalchemy.dialects.postgresql import ARRAY, INET, JSONB, TIMESTAMP
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -28,6 +28,10 @@ class UserRow(Base):
         CheckConstraint(
             "status IN ('unverified','verified','locked')",
             name="ck_users_status",
+        ),
+        CheckConstraint(
+            "actor_type IN ('user','admin')",
+            name="ck_users_actor_type",
         ),
         {"schema": "identity"},
     )
@@ -44,6 +48,12 @@ class UserRow(Base):
     updated_at: Mapped[datetime | None] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
     failed_totp_attempts: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
     locked_until: Mapped[datetime | None] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
+    password_hash: Mapped[str | None] = mapped_column(Text, nullable=True)
+    actor_type: Mapped[str] = mapped_column(Text, nullable=False, server_default="user")
+    user_metadata: Mapped[dict[str, Any]] = mapped_column(
+        "metadata", JSONB, nullable=False, server_default="{}"
+    )
+    login_failure_count: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
 
 
 class SessionRow(Base):
