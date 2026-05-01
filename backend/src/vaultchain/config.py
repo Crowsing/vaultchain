@@ -10,8 +10,23 @@ so Phase 1 boots without Phase 4 secrets.
 
 from __future__ import annotations
 
-from pydantic import Field, SecretStr
+import os
+from typing import Self
+
+from pydantic import Field, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from sqlalchemy.engine.url import make_url
+
+# `secrets_dir` lets pydantic-settings transparently read SecretStr fields
+# from `/run/secrets/<field_name>` files when no env var of the same name is
+# set. Matches docker-compose-prod.yml's `secrets:` mounts — without it the
+# api/worker containers crash on boot because SECRET_KEY, SUMSUB_*,
+# ANTHROPIC_API_KEY, etc. are only passed as `*_FILE=<path>` env vars that
+# pydantic doesn't natively understand.
+#
+# Resolve to None in dev/CI/test where /run/secrets isn't mounted, otherwise
+# pydantic-settings emits a UserWarning at every Settings() instantiation.
+_SECRETS_DIR: str | None = "/run/secrets" if os.path.isdir("/run/secrets") else None
 
 
 class Settings(BaseSettings):
@@ -20,6 +35,7 @@ class Settings(BaseSettings):
         env_file_encoding="utf-8",
         case_sensitive=False,
         extra="ignore",
+        secrets_dir=_SECRETS_DIR,
     )
 
     # ------------- core / phase 1 -------------
@@ -27,6 +43,10 @@ class Settings(BaseSettings):
     secret_key: SecretStr = Field(..., min_length=32)
     master_key_path: str | None = None
     database_url: str = Field(..., description="postgresql+asyncpg URL")
+    #: Read from `/run/secrets/postgres_password` when DATABASE_URL is supplied
+    #: without an embedded password (the prod compose pattern). The
+    #: ``_inject_db_password`` validator splices it into ``database_url``.
+    postgres_password: SecretStr | None = None
     redis_url: str = Field(..., description="redis:// or rediss:// URL")
     sentry_dsn_backend: str | None = None
     log_level: str = "INFO"
@@ -74,6 +94,30 @@ class Settings(BaseSettings):
 
     # ------------- CORS / phase 1 -------------
     cors_origins: list[str] = ["http://localhost:5173", "http://localhost:5174"]
+
+    @model_validator(mode="after")
+    def _inject_db_password(self) -> Self:
+        """Splice ``postgres_password`` into ``database_url`` when the URL has
+        no embedded password.
+
+        The prod compose file sets ``DATABASE_URL=postgresql+asyncpg://vaultchain@postgres:5432/vaultchain``
+        (no password) and mounts the password as a docker secret at
+        ``/run/secrets/postgres_password`` (which ``secrets_dir`` reads into
+        ``postgres_password``). Without this validator alembic + asyncpg fail
+        with ``password authentication failed`` on every boot.
+
+        Dev / CI / test envs bake the password into DATABASE_URL directly, so
+        this is a no-op there (the password check on the parsed URL skips).
+        """
+        if self.postgres_password and self.database_url:
+            url = make_url(self.database_url)
+            if not url.password:
+                # `str(url)` masks the password as ``***`` for safe logging;
+                # we need the real value so asyncpg can authenticate.
+                self.database_url = url.set(
+                    password=self.postgres_password.get_secret_value()
+                ).render_as_string(hide_password=False)
+        return self
 
 
 _settings: Settings | None = None

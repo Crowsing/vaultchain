@@ -24,7 +24,16 @@ if config.config_file_name is not None:
 # Phase 1: replace with `from vaultchain.shared.infra.database import Base`
 target_metadata = None
 
-db_url = os.getenv("DATABASE_URL", config.get_main_option("sqlalchemy.url"))
+# Use the validated Settings URL so docker-compose's password-via-secret-file
+# pattern works (Settings.postgres_password is read from /run/secrets/postgres_password
+# and spliced into database_url by `_inject_db_password`). Falls back to the
+# raw env var if the import path isn't available (e.g., minimal alembic shells).
+try:
+    from vaultchain.config import get_settings
+
+    db_url = get_settings().database_url
+except Exception:
+    db_url = os.getenv("DATABASE_URL", config.get_main_option("sqlalchemy.url"))
 config.set_main_option("sqlalchemy.url", db_url)
 
 
