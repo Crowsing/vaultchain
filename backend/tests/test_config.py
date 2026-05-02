@@ -81,6 +81,32 @@ def test_passwordless_url_without_postgres_password_passes_through() -> None:
 
 
 @pytest.mark.usefixtures("_isolate_env")
+def test_cors_origins_parses_comma_separated_from_env() -> None:
+    """Prod compose passes ``CORS_ORIGINS=https://app.<dom>,https://admin.<dom>``;
+    pydantic-settings' default list[str] decoder rejects this as not-JSON. The
+    field_validator splits commas before pydantic gets to it.
+    """
+    os.environ.update(_base_env())
+    os.environ["DATABASE_URL"] = "postgresql+asyncpg://vaultchain:dev@localhost:5432/vaultchain"
+    os.environ["CORS_ORIGINS"] = "https://app.example.com,https://admin.example.com"
+
+    s = Settings()
+    assert s.cors_origins == ["https://app.example.com", "https://admin.example.com"]
+
+
+@pytest.mark.usefixtures("_isolate_env")
+def test_cors_origins_still_parses_json_form() -> None:
+    """The JSON form still works (so existing dev/CI flows that set a JSON
+    list aren't broken)."""
+    os.environ.update(_base_env())
+    os.environ["DATABASE_URL"] = "postgresql+asyncpg://vaultchain:dev@localhost:5432/vaultchain"
+    os.environ["CORS_ORIGINS"] = '["https://app.example.com", "https://admin.example.com"]'
+
+    s = Settings()
+    assert s.cors_origins == ["https://app.example.com", "https://admin.example.com"]
+
+
+@pytest.mark.usefixtures("_isolate_env")
 def test_password_with_url_special_chars_is_quoted() -> None:
     """Passwords from ``openssl rand -hex 24`` are pure hex, but be defensive:
     if a special char ever appears it must be URL-encoded so asyncpg parses

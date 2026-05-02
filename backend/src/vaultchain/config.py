@@ -11,10 +11,10 @@ so Phase 1 boots without Phase 4 secrets.
 from __future__ import annotations
 
 import os
-from typing import Self
+from typing import Annotated, Self
 
-from pydantic import Field, SecretStr, model_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import Field, SecretStr, field_validator, model_validator
+from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 from sqlalchemy.engine.url import make_url
 
 # `secrets_dir` lets pydantic-settings transparently read SecretStr fields
@@ -93,7 +93,34 @@ class Settings(BaseSettings):
     telegram_chat_id: str | None = None
 
     # ------------- CORS / phase 1 -------------
-    cors_origins: list[str] = ["http://localhost:5173", "http://localhost:5174"]
+    # ``Annotated[..., NoDecode]`` opts out of pydantic-settings' default JSON
+    # decoder for complex types so the field_validator below sees the raw env
+    # string. Without it pydantic raises ``error parsing value for field
+    # "cors_origins"`` because the prod compose pattern is comma-separated,
+    # not JSON.
+    cors_origins: Annotated[list[str], NoDecode] = [
+        "http://localhost:5173",
+        "http://localhost:5174",
+    ]
+
+    @field_validator("cors_origins", mode="before")
+    @classmethod
+    def _split_cors_origins(cls, v: object) -> object:
+        """Accept comma-separated env (``https://app.<dom>,https://admin.<dom>``)
+        OR a JSON list. Plain list passes through (init kwargs / defaults)."""
+        if isinstance(v, str):
+            stripped = v.strip()
+            if stripped.startswith("["):
+                # JSON list form — manually decode now (NoDecode disabled the
+                # built-in path).
+                import json
+
+                parsed = json.loads(stripped)
+                if not isinstance(parsed, list):
+                    raise TypeError("CORS_ORIGINS JSON must be a list")
+                return parsed
+            return [item.strip() for item in stripped.split(",") if item.strip()]
+        return v
 
     @model_validator(mode="after")
     def _inject_db_password(self) -> Self:
