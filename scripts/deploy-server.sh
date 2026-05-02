@@ -5,19 +5,24 @@
 set -euo pipefail
 
 cd /opt/vaultchain
-export $(grep -v '^#' /etc/vaultchain/env | xargs)
+
+# Pass the env file directly to docker compose. Don't `export $(... xargs)` —
+# xargs splits values on whitespace, so EMAIL_FROM='VaultChain <noreply@...>'
+# (legit RFC-5322 with display name) gets mangled into just "VaultChain" plus
+# a `<noreply@...>` shell redirect, leaving EMAIL_FROM empty inside compose.
+COMPOSE=(docker compose -f docker-compose-prod.yml --env-file /etc/vaultchain/env)
 
 echo "[deploy-server] pulling backend image..."
-docker compose -f docker-compose-prod.yml pull api worker
+"${COMPOSE[@]}" pull api worker
 
 echo "[deploy-server] applying migrations..."
-docker compose -f docker-compose-prod.yml run --rm api alembic upgrade head
+"${COMPOSE[@]}" run --rm api alembic upgrade head
 
 echo "[deploy-server] reloading services..."
-docker compose -f docker-compose-prod.yml up -d --remove-orphans
+"${COMPOSE[@]}" up -d --remove-orphans
 
 echo "[deploy-server] reloading caddy..."
-docker compose -f docker-compose-prod.yml exec -T caddy caddy reload --config /etc/caddy/Caddyfile || true
+"${COMPOSE[@]}" exec -T caddy caddy reload --config /etc/caddy/Caddyfile || true
 
 echo "[deploy-server] done."
-docker compose -f docker-compose-prod.yml ps
+"${COMPOSE[@]}" ps
