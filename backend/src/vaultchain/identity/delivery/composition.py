@@ -49,6 +49,7 @@ from vaultchain.identity.domain.ports import (
 )
 from vaultchain.identity.infra.bcrypt_password_hasher import BcryptPasswordHasher
 from vaultchain.identity.infra.email.console import ConsoleEmailSender
+from vaultchain.identity.infra.email.resend import ResendEmailSender
 from vaultchain.identity.infra.repositories import (
     SqlAlchemyMagicLinkRepository,
     SqlAlchemySessionRepository,
@@ -68,6 +69,24 @@ from vaultchain.shared.infra.unit_of_work import SqlAlchemyUnitOfWork
 from vaultchain.shared.unit_of_work import AbstractUnitOfWork
 
 
+def _build_email_sender(settings: Settings) -> EmailSender:
+    """Pick the EmailSender adapter based on settings.
+
+    Production sets ``RESEND_API_KEY`` (a Resend dashboard secret) and
+    ``EMAIL_FROM`` (an address on a domain verified there). Dev/CI leave
+    both unset and get the console adapter — magic-link URLs land in the
+    api container's stdout, where ``docker compose logs api | grep magic_link``
+    surfaces them.
+    """
+    if settings.resend_api_key is not None:
+        return ResendEmailSender(
+            api_key=settings.resend_api_key.get_secret_value(),
+            from_address=settings.email_from,
+            frontend_url=settings.frontend_url,
+        )
+    return ConsoleEmailSender(frontend_url=settings.frontend_url)
+
+
 def install_identity_dependencies(app: FastAPI, settings: Settings) -> None:
     """Build the concrete adapters once and stash them on ``app.state``.
 
@@ -83,7 +102,7 @@ def install_identity_dependencies(app: FastAPI, settings: Settings) -> None:
     app.state.identity_sessionmaker = sessionmaker
     app.state.identity_access_cache = access_cache
     app.state.identity_pre_totp_cache = pre_totp_cache
-    app.state.identity_email_sender = ConsoleEmailSender(frontend_url=settings.frontend_url)
+    app.state.identity_email_sender = _build_email_sender(settings)
     app.state.identity_token_gen = SecretsRefreshTokenGenerator()
     app.state.identity_magic_link_gen = SecretsMagicLinkTokenGenerator()
     app.state.identity_totp_encryptor = StaticKeyTotpEncryptor(
