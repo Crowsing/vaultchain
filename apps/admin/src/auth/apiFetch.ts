@@ -1,7 +1,17 @@
 import { getAdminCsrfToken } from "./csrf";
 import { ApiError, type ErrorEnvelope } from "./types";
 
-const ADMIN_API_BASE = "/admin/api/v1";
+// Admin SPA and the FastAPI app live on different subdomains in production
+// (admin.<domain> vs api.<domain>), so calls must be absolute. Dev keeps the
+// relative form so the Vite proxy in vite.config.ts forwards to localhost:8000.
+function readApiBase(): string {
+  const env = (
+    import.meta as unknown as { env?: { VITE_API_BASE_URL?: string } }
+  ).env;
+  const base = env?.VITE_API_BASE_URL?.replace(/\/+$/, "") ?? "";
+  return `${base}/admin/api/v1`;
+}
+
 const MUTATING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 
 type ApiFetchOptions = {
@@ -58,9 +68,8 @@ export async function adminApiFetch<T = unknown>(
     }
   }
 
-  const url = path.startsWith("/")
-    ? `${ADMIN_API_BASE}${path}`
-    : `${ADMIN_API_BASE}/${path}`;
+  const base = readApiBase();
+  const url = path.startsWith("/") ? `${base}${path}` : `${base}/${path}`;
   const init: RequestInit = {
     method,
     headers,
