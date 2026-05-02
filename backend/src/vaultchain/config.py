@@ -97,26 +97,43 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def _inject_db_password(self) -> Self:
-        """Splice ``postgres_password`` into ``database_url`` when the URL has
+        """Splice the postgres password into ``database_url`` when the URL has
         no embedded password.
 
-        The prod compose file sets ``DATABASE_URL=postgresql+asyncpg://vaultchain@postgres:5432/vaultchain``
+        Prod compose sets ``DATABASE_URL=postgresql+asyncpg://vaultchain@postgres:5432/vaultchain``
         (no password) and mounts the password as a docker secret at
-        ``/run/secrets/postgres_password`` (which ``secrets_dir`` reads into
-        ``postgres_password``). Without this validator alembic + asyncpg fail
-        with ``password authentication failed`` on every boot.
+        ``/run/secrets/postgres_password``.
+
+        Resolution order for the password:
+        1. ``self.postgres_password`` populated via pydantic-settings
+           ``secrets_dir`` reading the same file.
+        2. Direct read of ``/run/secrets/postgres_password`` — defensive
+           fallback in case pydantic-settings doesn't pick it up (different
+           v2.x versions strip whitespace differently; the brief assumes the
+           file is the source of truth).
 
         Dev / CI / test envs bake the password into DATABASE_URL directly, so
         this is a no-op there (the password check on the parsed URL skips).
         """
-        if self.postgres_password and self.database_url:
-            url = make_url(self.database_url)
-            if not url.password:
-                # `str(url)` masks the password as ``***`` for safe logging;
-                # we need the real value so asyncpg can authenticate.
-                self.database_url = url.set(
-                    password=self.postgres_password.get_secret_value()
-                ).render_as_string(hide_password=False)
+        if not self.database_url:
+            return self
+        url = make_url(self.database_url)
+        if url.password:
+            return self  # URL already has password (dev/test path)
+
+        password: str | None = None
+        if self.postgres_password:
+            password = self.postgres_password.get_secret_value()
+        if not password:
+            from pathlib import Path
+
+            pw_file = Path("/run/secrets/postgres_password")
+            if pw_file.is_file():
+                password = pw_file.read_text().strip() or None
+        if password:
+            # `str(url)` masks the password as ``***`` for safe logging; we
+            # need the real value so asyncpg can authenticate.
+            self.database_url = url.set(password=password).render_as_string(hide_password=False)
         return self
 
 
