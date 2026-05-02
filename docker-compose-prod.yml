@@ -52,6 +52,12 @@ services:
       MASTER_KEY_PATH: /run/secrets/master_key
       SECRET_KEY_FILE: /run/secrets/secret_key
       CORS_ORIGINS: "https://app.${USER_DOMAIN},https://admin.${USER_DOMAIN}"
+      # Magic-link verify URL is built off this — without it the link in the
+      # email points to localhost:5173 and clicks dead-end.
+      FRONTEND_URL: "https://app.${USER_DOMAIN}"
+      # Resend "From" header — must be on a domain verified in the Resend
+      # dashboard or sends fail with HTTP 422.
+      EMAIL_FROM: ${EMAIL_FROM}
       SENTRY_DSN_BACKEND: ${SENTRY_DSN_BACKEND:-}
       SUMSUB_APP_TOKEN_FILE: /run/secrets/sumsub_app_token
       SUMSUB_SECRET_KEY_FILE: /run/secrets/sumsub_secret_key
@@ -98,6 +104,8 @@ services:
       REDIS_URL: redis://redis:6379/0
       MASTER_KEY_PATH: /run/secrets/master_key
       SECRET_KEY_FILE: /run/secrets/secret_key
+      FRONTEND_URL: "https://app.${USER_DOMAIN}"
+      EMAIL_FROM: ${EMAIL_FROM}
       SENTRY_DSN_BACKEND: ${SENTRY_DSN_BACKEND:-}
       SUMSUB_APP_TOKEN_FILE: /run/secrets/sumsub_app_token
       SUMSUB_SECRET_KEY_FILE: /run/secrets/sumsub_secret_key
