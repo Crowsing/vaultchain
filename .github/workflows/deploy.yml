@@ -58,7 +58,11 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @vaultchain/web build
+        env:
+          VITE_API_BASE_URL: https://api.${{ secrets.USER_DOMAIN }}
       - run: pnpm --filter @vaultchain/admin build
+        env:
+          VITE_API_BASE_URL: https://api.${{ secrets.USER_DOMAIN }}
       - uses: actions/upload-artifact@v4
         with:
           name: web-dist
